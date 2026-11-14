@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/
+*.py[cod]
+
+# Artefatos locais gerados pelos experimentos
+/runs/

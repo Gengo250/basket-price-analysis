@@ -1,0 +1,21 @@
+[project]
+name = "basket-price-prediction"
+version = "0.1.0"
+description = "Análise temporal de preços da cesta básica"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "numpy>=1.26,<3", "pandas>=2.2,<3", "scipy>=1.12,<2",
+    "scikit-learn>=1.5,<2", "matplotlib>=3.8,<4", "seaborn>=0.13,<1",
+    "jupyterlab>=4.2,<5", "ipykernel>=6.29,<7", "nbconvert>=7.16,<8",
+    "openpyxl>=3.1,<4", "joblib>=1.4,<2"
+]
+
+[dependency-groups]
+dev = ["pytest>=8,<10"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
