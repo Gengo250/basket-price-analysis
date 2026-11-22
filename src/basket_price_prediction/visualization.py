@@ -15,7 +15,18 @@ def save_figures(pred, model, threshold: float, directory: Path) -> None:
     def save(name):
         plt.tight_layout(); plt.savefig(directory/name,dpi=130,bbox_inches='tight'); plt.close()
     y=pred.target; p=pred.probability
-    plt.figure(figsize=(5,4)); sns.heatmap(confusion_matrix(y,p>=threshold,labels=[0,1]),annot=True,fmt='d',cmap='Blues',xticklabels=['0','1'],yticklabels=['0','1']); plt.xlabel('Classe prevista'); plt.ylabel('Classe real'); plt.title('Matriz de confusão — teste'); save('confusion_matrix.png')
+    plt.figure(figsize=(6, 4))
+    sns.heatmap(
+        confusion_matrix(y, p >= threshold, labels=[0, 1]),
+        annot=True, fmt='d', cmap='Blues',
+        xticklabels=['Sem alerta', 'Com alerta'],
+        yticklabels=['Sem alta > 2%', 'Com alta > 2%'],
+    )
+    plt.yticks(rotation=0)
+    plt.xlabel('Previsão')
+    plt.ylabel('Observação')
+    plt.title('Matriz de confusão no teste')
+    save('confusion_matrix.png')
     precision,recall,thresholds=precision_recall_curve(y,p)
     plt.figure(); plt.plot(recall,precision); plt.axhline(y.mean(),ls='--',color='gray',label='Prevalência'); plt.xlabel('Recall'); plt.ylabel('Precisão'); plt.title('Curva precisão–recall'); plt.legend(); save('precision_recall_curve.png')
     if y.nunique()==2:
@@ -24,6 +35,18 @@ def save_figures(pred, model, threshold: float, directory: Path) -> None:
     observed,mean=calibration_curve(y,p,n_bins=10,strategy='quantile'); plt.figure(); plt.plot(mean,observed,'o-'); plt.plot([0,1],[0,1],'--',color='gray'); plt.xlabel('Probabilidade média prevista'); plt.ylabel('Frequência observada'); plt.title('Calibração por decis'); save('calibration_curve.png')
     plt.figure(); plt.plot(thresholds,precision[:-1],label='Precisão'); plt.plot(thresholds,recall[:-1],label='Recall'); plt.axvline(threshold,color='gray',ls='--',label='Limiar escolhido'); plt.xlabel('Limiar de probabilidade'); plt.ylabel('Métrica'); plt.title('Precisão e recall por limiar'); plt.legend(); save('threshold_tradeoff.png')
     monthly=group_performance(pred,'target_month',threshold).sort_values('target_month'); plt.figure(figsize=(10,4)); plt.plot(monthly.target_month.astype(str),monthly.precision,'o-',label='Precisão'); plt.plot(monthly.target_month.astype(str),monthly.recall,'o-',label='Recall'); plt.plot(monthly.target_month.astype(str),monthly.f1,'o-',label='F1'); plt.xticks(rotation=45,ha='right'); plt.ylim(0,1); plt.xlabel('Mês-alvo'); plt.ylabel('Métrica'); plt.title('Desempenho mensal no teste'); plt.legend(); save('monthly_performance.png')
+    months = monthly.target_month.dt.strftime('%m/%Y')
+    fig, ax = plt.subplots(figsize=(11, 4.5))
+    totals = ax.bar(months, monthly.n, color='#dce6ef', label='Observações no teste')
+    increases = ax.bar(months, monthly.positives, color='#245782', label='Altas observadas acima de 2%')
+    ax.bar_label(totals, padding=3, fontsize=8)
+    ax.bar_label(increases, label_type='center', color='white', fontsize=8)
+    ax.set_ylim(0, monthly.n.max() * 1.15)
+    ax.set(xlabel='Mês-alvo', ylabel='Número de observações', title='Altas observadas por mês no teste')
+    ax.tick_params(axis='x', labelrotation=45)
+    ax.legend()
+    save('monthly_observed_increases.png')
+
     for col,label in [('product','produto'),('supermarket','supermercado')]:
         table=group_performance(pred,col,threshold); table=table[(table.n>=30) & table.recall.notna()].sort_values('n',ascending=False).head(20).sort_values('recall')
         plt.figure(figsize=(9,max(4,len(table)*.28))); plt.barh(table[col].astype(str),table.recall.fillna(0)); plt.xlabel('Recall (mínimo 30 observações)'); plt.ylabel(label.capitalize()); plt.title(f'Recall por {label} no teste'); save(f'{col}_performance.png')
