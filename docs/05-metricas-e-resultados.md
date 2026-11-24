@@ -2,7 +2,7 @@
 
 ## 📌 Evento positivo e matriz de confusão
 
-A classe positiva é a alta **superior** a 2% no mês seguinte. A matriz da execução `20261114_142933_489430_ab7cee47_logreg`, no teste temporal, tem linhas reais e colunas previstas:
+A classe positiva é a alta **superior** a 2% no mês seguinte. A matriz do teste temporal de setembro de 2025 a agosto de 2026, tem linhas reais e colunas previstas:
 
 | Classe real / previsão | 0: sem alerta | 1: alerta | Total |
 | --- | ---: | ---: | ---: |
@@ -25,16 +25,18 @@ Um falso positivo é um alerta sem alta superior a 2%; um falso negativo é uma 
 
 As classes estão desbalanceadas: 919 de 3.180 observações do teste, cerca de 28,9%, são positivas. Sempre prever classe 0 atinge acurácia de 71,1%, mas deixa de encontrar todas as altas. Portanto acurácia isolada é insuficiente para a pergunta principal.
 
-| Resultado | Regressão logística | Sempre classe 0 | Repete alta anterior |
-| --- | ---: | ---: | ---: |
-| Precisão | 0,390 | 0,000 | 0,225 |
-| Recall | 0,706 | 0,000 | 0,217 |
-| F1 | 0,503 | 0,000 | 0,220 |
-| Acurácia | 0,596 | 0,711 | 0,558 |
+| Resultado | Regressão logística | Nunca alerta | Sempre alerta | Repete alta anterior |
+| --- | ---: | ---: | ---: | ---: |
+| Precisão | 0,390 | 0,000 | 0,289 | 0,225 |
+| Recall | 0,706 | 0,000 | 1,000 | 0,217 |
+| F1 | 0,503 | 0,000 | 0,448 | 0,220 |
+| Acurácia | 0,596 | 0,711 | 0,289 | 0,558 |
+| Altas identificadas | 649 | 0 | 919 | 199 |
+| Falsos alertas | 1.015 | 0 | 2.261 | 687 |
 
-As duas referências são regras sem treinamento e usam as mesmas linhas elegíveis do teste. “Repete alta anterior” indica classe 1 se o preço de `t` subiu mais de 2% frente a `t−1`; não usa o preço futuro. Essa comparação contextualiza, mas não prova utilidade financeira.
+As três referências são regras sem treinamento e usam as mesmas 3.180 linhas do teste. Repetir a alta anterior emite alerta quando o preço de `t` subiu mais de 2% frente a `t−1`. Sempre alertar tem recall de 100% e gera 2.261 falsos alertas. A regressão logística reduz os falsos alertas para 1.015 e deixa passar 270 altas. A precisão de 39,0% e o F1 de 0,503 descrevem esse equilíbrio com o limiar de alerta de 0,25 escolhido na validação. A referência de sempre alertar foi adicionada depois da análise inicial do teste, com a mesma divisão temporal e os parâmetros originais.
 
-O código retorna zero para precisão sem positivos previstos; para grupos sem casos positivos reais, recall e F1 são `null`. Acurácia balanceada e ROC-AUC são `null` quando falta uma classe. Pequenos grupos exigem cautela mesmo quando as métricas são calculáveis.
+Em grupos com observações e sem alertas, a precisão é zero por convenção. Sem altas observadas, recall, F1 e *average precision* ficam indefinidos. Acurácia balanceada e ROC-AUC ficam indefinidas quando falta uma classe. Para zero observações, as métricas são indefinidas e a matriz de confusão tem contagens zeradas. Valores indefinidos são registrados como `null` no JSON.
 
 ## 📈 Curvas e qualidade das probabilidades
 
@@ -54,7 +56,7 @@ Entre os produtos com pelo menos 30 observações totais, pão francês teve rec
 
 ## 🧭 Resposta à pesquisa
 
-Os resultados são compatíveis com a existência de sinal preditivo no período e na amostra elegíveis: a regressão logística superou as referências descritivas em recall/F1 e apresentou AP acima da prevalência. Entretanto, 61% dos alertas foram falsos, o recall variou no tempo e o estudo não estima retorno financeiro, custos ou garantia de generalização. A conclusão é exploratória e condicionada às limitações da fonte e do protocolo.
+Os resultados são compatíveis com a existência de sinal preditivo no período e na amostra elegíveis: a regressão logística teve F1 superior ao das três referências e apresentou AP acima da prevalência. Entretanto, 61% dos alertas foram falsos, o recall variou no tempo e o estudo não estima retorno financeiro, custos ou garantia de generalização. A conclusão é exploratória e condicionada às limitações da fonte e do protocolo.
 
 [^1]: Scikit-learn, *average_precision_score*, https://scikit-learn.org/stable/modules/generated/sklearn.metrics.average_precision_score.html.
 [^2]: Scikit-learn, *Probability calibration*, https://scikit-learn.org/stable/modules/calibration.html.

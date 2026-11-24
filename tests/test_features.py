@@ -5,7 +5,7 @@ from basket_price_prediction.features import build_supervised
 def monthly(prices, months=None, product='Arroz', supermarket='S1'):
     return pd.DataFrame({'supermarket':supermarket,'product':product,'brand':'A','quantity':1.,'month':pd.to_datetime(months or pd.date_range('2024-01-01',periods=len(prices),freq='MS')),'price_current':prices,'records':1})
 
-@pytest.mark.parametrize('next_price,expected',[(102.01,1),(102,0),(99,0)])
+@pytest.mark.parametrize('next_price,expected',[(101.99, 0), (102, 0), (102 + 1e-11, 0), (102.01, 1), (99, 0)])
 def test_strict_target(next_price,expected):
     d,_=build_supervised(monthly([100,100,100,next_price]))
     assert len(d)==1 and d.iloc[0].target==expected
@@ -29,3 +29,14 @@ def test_gaps_and_entities_separate():
     assert set(d.price_lag_1)=={2,200,6}
     gapped=monthly([1,2,3,4],['2024-01-01','2024-03-01','2024-04-01','2024-05-01'])
     assert build_supervised(gapped)[0].empty
+
+
+def test_reports_loss_when_target_exists_but_history_has_gap():
+    observations = monthly(
+        [100, 101, 102, 105],
+        ['2024-01-01', '2024-03-01', '2024-04-01', '2024-05-01'],
+    )
+    examples, report = build_supervised(observations)
+    assert examples.empty
+    assert report['with_target_without_history'] == 2
+    assert report['without_next_calendar_month'] == 2

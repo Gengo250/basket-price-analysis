@@ -35,7 +35,7 @@ def write_json(path: Path, data: dict) -> None:
     path.write_text(json.dumps(data,ensure_ascii=False,indent=2,allow_nan=False,default=str)+'\n',encoding='utf-8')
 
 def write_excel_report(table: pd.DataFrame, path: Path, title: str) -> None:
-    """Exporta uma tabela Excel com título e largura ajustada aos valores exibidos."""
+    """Exporta uma tabela Excel."""
     with pd.ExcelWriter(path, engine='openpyxl') as writer:
         table.to_excel(writer, sheet_name='Resultados', index=False, startrow=2)
         sheet = writer.sheets['Resultados']

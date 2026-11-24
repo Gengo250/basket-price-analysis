@@ -19,7 +19,7 @@ O [guia em docs/](docs/README.md) detalha a construção do alvo, atributos temp
 - São exigidos preços nos meses consecutivos t, t−1 e t−2. O alvo é 1 se `(preço t+1 / preço t) − 1 > 0,02`; exatamente 2% pertence à classe 0. Sem preço no mês-calendário seguinte, não há alvo. Entram preços e variações históricas, estatísticas da janela t−2 até t, mês cíclico e categorias; o preço futuro nunca é atributo.
 - A divisão considera o **mês-alvo**: treino setembro/2022–dezembro/2024; validação janeiro–agosto/2025; teste setembro/2025–agosto/2026. A janela histórica reduz o início efetivo do treino. Transformações são ajustadas somente nos dados de ajuste.
 - `Pipeline` combina padronização numérica, one-hot com categorias desconhecidas e **LogisticRegression**, único classificador. Validam-se `C` em 0,1, 1 e 10, pesos de classe e limiares de 0,10 a 0,90. O critério é maior F1 na validação com precisão ≥ 0,35; o fallback, se necessário, é registrado. Após seleção, reajusta-se em treino + validação e avalia-se uma vez no teste. As predições de validação são do modelo antes do reajuste.
-- Reportam-se precisão, recall, F1, acurácia, acurácia balanceada, ROC-AUC, average precision, Brier e matriz de confusão. As regras sempre-zero e repetição da alta anterior são referências sem treinamento, no mesmo teste. Grupos sem positivos têm recall e F1 indefinidos; precisão sem previsões positivas é reportada como zero por convenção.
+- Reportam-se precisão, recall, F1, acurácia, acurácia balanceada, ROC-AUC, average precision, Brier e matriz de confusão. As regras de nunca alertar, sempre alertar e repetir a alta anterior são referências sem treinamento no mesmo teste. Grupos sem positivos têm recall e F1 indefinidos; precisão sem previsões positivas é reportada como zero por convenção.
 
 ## Instalação e execução
 
@@ -72,7 +72,7 @@ Experimento: `runs/results/20261114_142933_489430_ab7cee47_logreg/` (a segunda e
 | Average precision | 0,523 |
 | Brier | 0,181 |
 
-A matriz contém 1.246 verdadeiros negativos, 1.015 falsos positivos, 270 falsos negativos e 649 verdadeiros positivos. A referência sempre-zero tem acurácia 0,711 e recall 0; repetir a alta anterior tem F1 0,220. O modelo apresenta informação preditiva nesse período, mas a precisão de 39% mostra muitos alarmes falsos. O recall mensal varia entre 0,553 e 0,862; diferenças por produto devem ser lidas com os respectivos tamanhos e números de positivos nos relatórios.
+A matriz contém 1.246 verdadeiros negativos, 1.015 falsos positivos, 270 falsos negativos e 649 verdadeiros positivos. A referência sempre-zero tem acurácia 0,711, com recall 0. Sempre alertar atinge recall 1,000 e F1 0,448. Repetir a alta anterior tem F1 0,220. O modelo apresenta informação preditiva nesse período, mas a precisão de 39% mostra muitos alarmes falsos. O recall mensal varia entre 0,553 e 0,862; diferenças por produto devem ser lidas com os respectivos tamanhos e números de positivos nos relatórios.
 
 ## Limitações
 

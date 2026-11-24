@@ -1,7 +1,13 @@
 """Apenas preços de t, t-1 e t-2 consecutivos entram nos preditores."""
 import numpy as np
 import pandas as pd
-from .config import ENTITY, FEATURES
+from .config import ENTITY, FEATURES, INCREASE_THRESHOLD, INCREASE_TOLERANCE
+
+def is_price_increase(change: pd.Series) -> pd.Series:
+    """Identifica altas que excedem o limite fora da tolerância numérica."""
+    return change.gt(INCREASE_THRESHOLD) & ~np.isclose(
+        change, INCREASE_THRESHOLD, rtol=0, atol=INCREASE_TOLERANCE,
+    )
 
 def build_supervised(monthly: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     d = monthly.sort_values(ENTITY+['month']).copy()
@@ -28,7 +34,7 @@ def build_supervised(monthly: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     # Comparação monetária tolerante ao erro de ponto flutuante: exatamente 2% é classe zero.
     d['target'] = pd.Series(pd.NA, index=d.index, dtype='Int64')
     valid = d.actual_change.notna()
-    d.loc[valid,'target'] = ((d.loc[valid,'actual_change'] > .02) & ~np.isclose(d.loc[valid,'actual_change'], .02, rtol=0, atol=1e-12)).astype(int)
+    d.loc[valid,'target'] = is_price_increase(d.loc[valid, 'actual_change']).astype(int)
     history = d[['price_lag_1','price_lag_2']].notna().all(axis=1)
     report = {'monthly_observations':len(d), 'without_next_calendar_month':int((~valid).sum()), 'with_target':int(valid.sum()), 'with_target_without_history':int((valid & ~history).sum()), 'eligible':int((valid & history).sum())}
     out = d.loc[valid & history].copy()

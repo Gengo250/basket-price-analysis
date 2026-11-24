@@ -33,6 +33,12 @@ O campo `PPK` foi comparado com `Preco / Quantidade`: nenhuma diferença excedeu
 
 O relatório da execução registrou 44.521 linhas válidas após remover duplicatas, 43.948 observações mensais agregadas e 4.216 séries. Nenhuma linha adicional foi excluída pelos critérios de mês, entidade, preço, quantidade ou coleta fora do mês nessa execução. Motivos de exclusão em geral podem se sobrepor e não devem ser somados sem conferir as interseções.
 
+### Investigação de preços suspeitos
+
+O diagnóstico trabalha com registros válidos antes da mediana mensal. Para cada registro, compara o preço com a mediana dos preços mensais da mesma série nos meses imediatamente anterior e posterior disponíveis. Também usa a mediana dos demais supermercados com o mesmo produto, marca e quantidade no mesmo mês quando há pelo menos dois outros supermercados. Cada supermercado contribui com uma mediana para essa comparação.
+
+Um registro é sinalizado quando seu preço é pelo menos três vezes ou no máximo um terço de alguma referência. O notebook exploratório identifica produto, supermercado, marca, quantidade, mês, preço e a comparação que motivou o alerta. Quando a marca está ausente, o grupo pode conter embalagens de marcas distintas. Valores sinalizados são mantidos com ressalva, pois a comparação interna indica discrepância e a base não confirma a origem de cada valor.
+
 ## 🧮 Alvo de classificação
 
 Para uma série e um mês de previsão `t`, sejam `P_t` o preço da embalagem em `t` e `P_(t+1)` o preço no mês-calendário imediatamente seguinte:
@@ -51,7 +57,7 @@ Exemplo com `P_t = R$ 10,00`:
 | R$ 10,20 | +2% | 0 |
 | R$ 9,80 | −2% | 0 |
 
-Na implementação, a comparação usa tolerância absoluta de `1e-12` ao redor de `0,02` para evitar que erro de representação de ponto flutuante transforme uma alta de exatamente 2% em classe 1. Assim, valores extremamente próximos e acima de 2% também são tratados como classe 0 dentro dessa tolerância.
+O limite e a tolerância são definidos em [config.py](../src/basket_price_prediction/config.py). A comparação usa tolerância absoluta de `1e-12` ao redor de `0,02` para evitar que erro de representação de ponto flutuante transforme uma alta de exatamente 2% em classe 1. Assim, valores extremamente próximos e acima de 2% também são tratados como classe 0 dentro dessa tolerância.
 
 Se não existir preço no mês seguinte, o rótulo não é criado. Por exemplo, janeiro seguido de março não constitui uma variação mensal de janeiro para fevereiro. O mês de `t+1` é salvo como `target_month`, e a variação real é armazenada apenas para avaliação, sem entrar nos atributos.
 
