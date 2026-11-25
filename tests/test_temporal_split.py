@@ -20,7 +20,7 @@ def test_splits_target_boundaries_and_overlap():
 
 def test_encoder_and_scaler_fit_only_training():
     train=frame('2024-12'); test=frame('2025-09'); test['product']='unseen'; test['price_current']=99999
-    model=make_pipeline(1,None).fit(train[FEATURES],train.target)
+    model=make_pipeline('logistic_regression',{'C':1.,'class_weight':None}).fit(train[FEATURES],train.target)
     assert model.named_steps['preprocess'].named_transformers_['num'].mean_[0]==train.price_current.mean()
     assert 'unseen' not in model.named_steps['preprocess'].named_transformers_['cat'].categories_[1]
     assert len(model.predict_proba(test[FEATURES]))==len(test)

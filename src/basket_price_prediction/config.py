@@ -1,9 +1,11 @@
 """Configuração explícita e limites por mês-alvo."""
 from pathlib import Path
+import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
 DATASET = ROOT / 'data' / 'ICB_DADOS_2026.xlsx'
 RESULTS = ROOT / 'runs' / 'results'
+REPORT = ROOT / 'relatorio'
 SEED = 42
 INCREASE_THRESHOLD = 0.02
 INCREASE_TOLERANCE = 1e-12
@@ -18,3 +20,9 @@ ENTITY = ['supermarket', 'product', 'brand', 'quantity']
 NUMERIC = ['price_current', 'price_lag_1', 'price_lag_2', 'variation_1m', 'variation_2m', 'rolling_mean_3m', 'rolling_std_3m', 'rolling_min_3m', 'rolling_max_3m', 'month_sin', 'month_cos']
 CATEGORICAL = ['supermarket', 'product', 'brand', 'quantity']
 FEATURES = NUMERIC + CATEGORICAL
+# Alta estritamente acima de 2% ao mês; 2% compostos em 12 meses equivalem a 26,8% ao ano.
+TARGET_THRESHOLD = 0.02
+THRESHOLDS = np.arange(.10, .91, .05)
+MIN_PRECISION = 0.35
+BOOTSTRAP_SAMPLES = 2000
+CONFIDENCE_LEVEL = 0.95

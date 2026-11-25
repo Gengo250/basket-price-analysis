@@ -1,0 +1,121 @@
+{
+  "status": "complete",
+  "started_utc": "2026-11-25T14:13:18.919011+00:00",
+  "completed_utc": "2026-11-25T14:14:31.949539+00:00",
+  "python_version": "3.12.13",
+  "sklearn_version": "1.9.1",
+  "dataset_sha256": "d92c1a8b2e3273dc90a2f6c07c1620940ec83f114ab7548f9e8aaf45f96fa836",
+  "lockfile": "uv.lock",
+  "lockfile_sha256": "efd36a62e474ed869a405bc9b0798ec17d91ea7ce661d147bba20df02547611a",
+  "git_commit": null,
+  "git_commit_note": "não consultado: instrução local proíbe comandos git sem pedido explícito",
+  "configuration": {
+    "model": "random_forest",
+    "selection": {
+      "algorithm": "random_forest",
+      "params": {
+        "class_weight": null,
+        "max_depth": 10,
+        "min_samples_leaf": 5
+      },
+      "threshold": 0.25,
+      "criterion": "maior F1 na validação com precisão >= 0.35; desempate por precisão, menor limiar e nome do algoritmo",
+      "searched_algorithms": [
+        "decision_tree",
+        "gradient_boosting",
+        "logistic_regression",
+        "random_forest"
+      ],
+      "fits": 24,
+      "candidate_rows": 408,
+      "fallback_no_candidate_met_precision": false
+    },
+    "random_state": 42,
+    "features": [
+      "price_current",
+      "price_lag_1",
+      "price_lag_2",
+      "variation_1m",
+      "variation_2m",
+      "rolling_mean_3m",
+      "rolling_std_3m",
+      "rolling_min_3m",
+      "rolling_max_3m",
+      "month_sin",
+      "month_cos",
+      "supermarket",
+      "product",
+      "brand",
+      "quantity"
+    ],
+    "numeric": [
+      "price_current",
+      "price_lag_1",
+      "price_lag_2",
+      "variation_1m",
+      "variation_2m",
+      "rolling_mean_3m",
+      "rolling_std_3m",
+      "rolling_min_3m",
+      "rolling_max_3m",
+      "month_sin",
+      "month_cos"
+    ],
+    "categorical": [
+      "supermarket",
+      "product",
+      "brand",
+      "quantity"
+    ],
+    "dataset": "data/ICB_DADOS_2026.xlsx",
+    "target_month_splits": {
+      "train": [
+        "2022-09",
+        "2024-12"
+      ],
+      "validation": [
+        "2025-01",
+        "2025-08"
+      ],
+      "test": [
+        "2025-09",
+        "2026-08"
+      ]
+    },
+    "algorithm_search": {
+      "families": [
+        "decision_tree",
+        "gradient_boosting",
+        "logistic_regression",
+        "random_forest"
+      ],
+      "configurations": {
+        "logistic_regression": 6,
+        "decision_tree": 6,
+        "random_forest": 8,
+        "gradient_boosting": 4
+      },
+      "minimum_validation_precision": 0.35,
+      "post_hoc_note": "Métricas de teste por família calculadas após a seleção já estar fechada na validação. Servem como diagnóstico de transparência e não realimentaram nenhuma escolha de algoritmo, hiperparâmetro ou limiar."
+    },
+    "uncertainty": {
+      "method": "bootstrap por série",
+      "samples": 2000
+    },
+    "preprocessing": {
+      "price": "preço da mesma embalagem; mediana mensal",
+      "entity": [
+        "supermarket",
+        "product",
+        "brand",
+        "quantity"
+      ],
+      "history": "t, t-1, t-2 consecutivos",
+      "numeric": "StandardScaler apenas no modelo linear",
+      "categorical": "OneHotEncoder(handle_unknown=ignore)",
+      "final_fit": "treino + validação",
+      "target": "aumento estritamente maior que 2%, próximo mês calendário"
+    },
+    "execution_utc": "2026-11-25T14:13:18.919011+00:00"
+  }
+}

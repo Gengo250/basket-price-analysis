@@ -1,0 +1,3 @@
+# Resultado do experimento
+
+Entre 4 famílias de algoritmos comparadas na validação, foi selecionado **random_forest** com limiar 0.25. No teste temporal: 3180 observações, 919 altas; precisão 0.392, recall 0.757, F1 0.517 (IC 95% de 0.495 a 0.538) e AP 0.538. Houve 1078 falsos positivos e 223 falsos negativos. O ganho de F1 sobre a regra 'repete alta anterior' tem IC 95% de +0.267 a +0.326. Os intervalos reamostram séries inteiras, não linhas isoladas. Importâncias e coeficientes são associações, não efeitos causais. A base não contém inflação nem fatores econômicos externos; mudanças de coleta e lacunas limitam a generalização.

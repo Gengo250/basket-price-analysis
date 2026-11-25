@@ -1,0 +1,66 @@
+{
+  "cleaning": {
+    "initial_records": 46264,
+    "missing_by_column": {
+      "Mes_Ano_Data": 0,
+      "Data_Coleta": 9818,
+      "Estab": 0,
+      "Produto": 0,
+      "Marca": 9346,
+      "Preco": 0,
+      "Quantidade": 0,
+      "PPK": 0
+    },
+    "exact_duplicates": 1743,
+    "invalid_reasons_overlapping": {
+      "month": 0,
+      "entity": 0,
+      "price": 0,
+      "quantity": 0,
+      "collection_outside_reference_month": 0
+    },
+    "valid_records_after_deduplication": 44521,
+    "ppk_discrepancies_over_0_01": 0,
+    "monthly_observations": 43948,
+    "monthly_series": 4216,
+    "aggregated_extra_records": 573,
+    "missing_brand_label": "(não informada)"
+  },
+  "features": {
+    "monthly_observations": 43948,
+    "without_next_calendar_month": 15108,
+    "with_target": 28840,
+    "with_target_without_history": 11838,
+    "eligible": 17002
+  },
+  "splits": {
+    "train": {
+      "n": 10268,
+      "class_counts": {
+        "0": 7200,
+        "1": 3068
+      },
+      "first_target_month": "2022-12-01",
+      "last_target_month": "2024-12-01"
+    },
+    "validation": {
+      "n": 3554,
+      "class_counts": {
+        "0": 2584,
+        "1": 970
+      },
+      "first_target_month": "2025-01-01",
+      "last_target_month": "2025-08-01"
+    },
+    "test": {
+      "n": 3180,
+      "class_counts": {
+        "0": 2261,
+        "1": 919
+      },
+      "first_target_month": "2025-09-01",
+      "last_target_month": "2026-08-01"
+    }
+  },
+  "collinearity_max_vif": 1e+308
+}

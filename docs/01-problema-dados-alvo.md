@@ -4,7 +4,22 @@
 
 A pergunta é: **dados históricos ajudam a prever se o preço de um produto, em um supermercado, aumentará mais de 2% no mês-calendário seguinte?** Cada exemplo corresponde a uma série de preço em um mês de referência. A saída é uma probabilidade para um evento binário, não uma previsão do valor monetário nem uma garantia de que a alta ocorrerá.
 
-O estudo é exploratório e educacional. Ele avalia a capacidade preditiva sobre observações elegíveis da base, e não a inflação oficial ou uma cesta de consumo fixa.
+O estudo avalia a capacidade preditiva sobre observações elegíveis da base, e não a inflação oficial ou uma cesta de consumo fixa.
+
+## 🎯 Objetivo e motivação
+
+**Objetivo.** Determinar se existe sinal preditivo aproveitável no histórico recente de preços e quantificá-lo com medida de incerteza, de forma que uma organização consiga decidir se vale construir um alerta de alta sobre esses dados e a que custo de falsos alarmes.
+
+**Motivação.** A cesta básica consome a maior fatia do orçamento de famílias de baixa renda, que são justamente as com menor capacidade de antecipar compras. A pesquisa de preços que gera esta base já é pública, mas é lida de forma retrospectiva: ela informa o que já aconteceu.
+
+**Aplicação esperada.** Dois destinatários diretos:
+
+1. **Organizações de assistência alimentar e compras coletivas** — bancos de alimentos, cozinhas comunitárias, associações de bairro —, que compram em volume e têm alguma capacidade de estoque. Um aviso de alta provável acima de 2% é acionável: antecipa-se a compra. O erro é barato, custando capital de giro e espaço de estoque.
+2. **Programas de educação financeira e defesa do consumidor**, que podem dirigir atenção aos itens e estabelecimentos de maior risco no mês em vez de tratar a cesta de forma uniforme.
+
+Essa assimetria de custo — deixar de avisar uma alta real custa mais do que avisar uma alta que não veio — é a justificativa metodológica do limiar baixo, da métrica F1 e do piso de precisão descritos em [pipeline e seleção](04-pipeline-e-selecao.md).
+
+**Critério de sucesso declarado antes do resultado.** O estudo é bem-sucedido se o modelo superar com significância estatística duas referências sem treinamento: prever sempre "sem alta" e repetir a alta do mês anterior. Caso contrário, a resposta honesta à questão é negativa.
 
 ## 📋 Fonte e esquema
 
@@ -48,6 +63,18 @@ variação futura = (P_(t+1) - P_t) / P_t
 classe 1         = variação futura > 0,02
 classe 0         = variação futura <= 0,02
 ```
+
+### Por que exatamente 2%
+
+O limite não é arbitrário; a distribuição da própria base o justifica. Entre as 17.002 transições mensais elegíveis:
+
+| Faixa de variação mensal | Participação |
+| --- | ---: |
+| Queda maior que 2% | 27,3% |
+| Estável, dentro de ±2% | **43,5%** |
+| Alta maior que 2% | 29,2% |
+
+A mediana da variação mensal é exatamente `0,000`, e em **36,4% das transições o preço não muda nem um centavo**: preço de supermercado é rígido, fica parado por meses e então salta. A faixa de ±2% isola essa zona de rigidez e de reprecificação rotineira. O corte também é economicamente relevante: 2% ao mês compostos equivalem a **26,8% ao ano**, bem acima da meta de inflação brasileira. Um item que cruza esse limite encarece acima da inflação, e não apenas a acompanha.
 
 Exemplo com `P_t = R$ 10,00`:
 

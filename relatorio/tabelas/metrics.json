@@ -1,0 +1,261 @@
+{
+  "validation_before_refit": {
+    "n": 3554,
+    "positives": 970,
+    "negatives": 2584,
+    "accuracy": 0.6299943725379854,
+    "precision": 0.40182128628343766,
+    "recall": 0.7278350515463917,
+    "f1": 0.5177851118445178,
+    "balanced_accuracy": 0.6605506527081804,
+    "roc_auc": 0.7148221809070887,
+    "average_precision": 0.5017241968311668,
+    "brier_score": 0.17603522002523378,
+    "confusion_matrix": [
+      [
+        1533,
+        1051
+      ],
+      [
+        264,
+        706
+      ]
+    ],
+    "positive_prediction_rate": 0.4943725379853686
+  },
+  "test": {
+    "n": 3180,
+    "positives": 919,
+    "negatives": 2261,
+    "accuracy": 0.5908805031446541,
+    "precision": 0.3923337091319053,
+    "recall": 0.7573449401523396,
+    "f1": 0.5168956554028964,
+    "balanced_accuracy": 0.6402823771969128,
+    "roc_auc": 0.7145768793743945,
+    "average_precision": 0.5382693781431762,
+    "brier_score": 0.17817868361522995,
+    "confusion_matrix": [
+      [
+        1183,
+        1078
+      ],
+      [
+        223,
+        696
+      ]
+    ],
+    "positive_prediction_rate": 0.5578616352201258
+  },
+  "test_confidence_intervals": {
+    "samples": 2000,
+    "requested_samples": 2000,
+    "level": 0.95,
+    "resampled_unit": [
+      "supermarket",
+      "product",
+      "brand",
+      "quantity"
+    ],
+    "series": 785,
+    "intervals": {
+      "precision": {
+        "low": 0.37071016473731505,
+        "median": 0.3927678559267152,
+        "high": 0.41351638662658563
+      },
+      "recall": {
+        "low": 0.7246983668085587,
+        "median": 0.7571504317527646,
+        "high": 0.7895350869605956
+      },
+      "f1": {
+        "low": 0.49472713519292844,
+        "median": 0.5169992330906039,
+        "high": 0.5378408401474993
+      },
+      "accuracy": {
+        "low": 0.5706108597967369,
+        "median": 0.5913127481584,
+        "high": 0.6106345932686498
+      },
+      "balanced_accuracy": {
+        "low": 0.6228435896001403,
+        "median": 0.6404398645432317,
+        "high": 0.6572768699097034
+      },
+      "roc_auc": {
+        "low": 0.694783431517788,
+        "median": 0.7145447128454112,
+        "high": 0.7338962548170472
+      },
+      "average_precision": {
+        "low": 0.5064770536074928,
+        "median": 0.5391002429951668,
+        "high": 0.5708662463243335
+      },
+      "brier_score": {
+        "low": 0.17156354832449172,
+        "median": 0.17822673512409215,
+        "high": 0.18469913576797853
+      },
+      "f1_gain_over_previous_increase": {
+        "low": 0.26708774061191415,
+        "median": 0.29602710103449503,
+        "high": 0.32598916161933
+      },
+      "balanced_accuracy_gain_over_always_zero": {
+        "low": 0.1228435896001403,
+        "median": 0.14043986454323165,
+        "high": 0.15727686990970335
+      }
+    }
+  },
+  "reference_test_always_zero": {
+    "n": 3180,
+    "positives": 919,
+    "negatives": 2261,
+    "accuracy": 0.7110062893081761,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "balanced_accuracy": 0.5,
+    "roc_auc": 0.5,
+    "average_precision": 0.2889937106918239,
+    "brier_score": 0.2889937106918239,
+    "confusion_matrix": [
+      [
+        2261,
+        0
+      ],
+      [
+        919,
+        0
+      ]
+    ],
+    "positive_prediction_rate": 0.0
+  },
+  "reference_test_previous_increase": {
+    "n": 3180,
+    "positives": 919,
+    "negatives": 2261,
+    "accuracy": 0.5575471698113208,
+    "precision": 0.22460496613995484,
+    "recall": 0.21653971708378672,
+    "f1": 0.22049861495844875,
+    "balanced_accuracy": 0.4563459310761702,
+    "roc_auc": 0.4563459310761702,
+    "average_precision": 0.27505099016318196,
+    "brier_score": 0.44245283018867926,
+    "confusion_matrix": [
+      [
+        1574,
+        687
+      ],
+      [
+        720,
+        199
+      ]
+    ],
+    "positive_prediction_rate": 0.27861635220125786
+  },
+  "post_hoc_test_by_algorithm": {
+    "note": "Métricas de teste por família calculadas após a seleção já estar fechada na validação. Servem como diagnóstico de transparência e não realimentaram nenhuma escolha de algoritmo, hiperparâmetro ou limiar.",
+    "decision_tree": {
+      "n": 3180,
+      "positives": 919,
+      "negatives": 2261,
+      "accuracy": 0.5955974842767295,
+      "precision": 0.3865182436611008,
+      "recall": 0.6800870511425462,
+      "f1": 0.49290220820189273,
+      "balanced_accuracy": 0.6206715662612332,
+      "roc_auc": 0.6943931229212377,
+      "average_precision": 0.5200174640945018,
+      "brier_score": 0.18791158552123483,
+      "confusion_matrix": [
+        [
+          1269,
+          992
+        ],
+        [
+          294,
+          625
+        ]
+      ],
+      "positive_prediction_rate": 0.5084905660377359
+    },
+    "gradient_boosting": {
+      "n": 3180,
+      "positives": 919,
+      "negatives": 2261,
+      "accuracy": 0.6349056603773585,
+      "precision": 0.42302798982188294,
+      "recall": 0.7236126224156693,
+      "f1": 0.5339221196306704,
+      "balanced_accuracy": 0.6612313443789979,
+      "roc_auc": 0.7327424526880795,
+      "average_precision": 0.5601648140727076,
+      "brier_score": 0.17747167587671253,
+      "confusion_matrix": [
+        [
+          1354,
+          907
+        ],
+        [
+          254,
+          665
+        ]
+      ],
+      "positive_prediction_rate": 0.49433962264150944
+    },
+    "logistic_regression": {
+      "n": 3180,
+      "positives": 919,
+      "negatives": 2261,
+      "accuracy": 0.5959119496855346,
+      "precision": 0.39002403846153844,
+      "recall": 0.70620239390642,
+      "f1": 0.502516453735966,
+      "balanced_accuracy": 0.6286429926188447,
+      "roc_auc": 0.7020587056195824,
+      "average_precision": 0.5231026705239384,
+      "brier_score": 0.1813946085641599,
+      "confusion_matrix": [
+        [
+          1246,
+          1015
+        ],
+        [
+          270,
+          649
+        ]
+      ],
+      "positive_prediction_rate": 0.5232704402515723
+    },
+    "random_forest": {
+      "n": 3180,
+      "positives": 919,
+      "negatives": 2261,
+      "accuracy": 0.5908805031446541,
+      "precision": 0.3923337091319053,
+      "recall": 0.7573449401523396,
+      "f1": 0.5168956554028964,
+      "balanced_accuracy": 0.6402823771969128,
+      "roc_auc": 0.7145768793743945,
+      "average_precision": 0.5382693781431762,
+      "brier_score": 0.17817868361522995,
+      "confusion_matrix": [
+        [
+          1183,
+          1078
+        ],
+        [
+          223,
+          696
+        ]
+      ],
+      "positive_prediction_rate": 0.5578616352201258
+    }
+  }
+}

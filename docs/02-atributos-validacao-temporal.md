@@ -35,7 +35,7 @@ Os lags são obtidos após ordenar a série e são aceitos somente se a diferen�
 
 As categorias são supermercado, produto, marca e quantidade. A quantidade é convertida em texto para ser tratada como identificador de embalagem. Mês, mês-alvo, alvo e variação futura ficam disponíveis para identificar linhas e avaliar, mas não pertencem à lista `FEATURES`. O preço futuro é usado na construção do rótulo e não é passado ao pipeline.
 
-`OneHotEncoder` e `StandardScaler` são ajustados dentro do pipeline: durante a seleção, apenas no treino; no modelo final, no conjunto combinado de treino e validação. Esse cuidado impede que estatísticas de escala ou categorias do teste influenciem o ajuste.
+`OneHotEncoder` e `StandardScaler` são ajustados dentro do pipeline: durante a seleção, apenas no treino; no modelo final, no conjunto combinado de treino e validação. Esse cuidado impede que estatísticas de escala ou categorias do teste influenciem o ajuste. O `StandardScaler` é aplicado somente à família linear, pelos motivos descritos em [pipeline e comparação](04-pipeline-e-selecao.md).
 
 ## 🗓️ Divisão por mês-alvo
 
@@ -47,16 +47,16 @@ As categorias são supermercado, produto, marca e quantidade. A quantidade é co
 
 Devido ao histórico mínimo, o primeiro alvo efetivo do treino foi dezembro de 2022. Em setembro de 2025, o teste usa informações até agosto de 2025. `temporal_split` verifica conjuntos não vazios, não sobreposição de meses-alvo e ordem cronológica; não há divisão aleatória nem validação cruzada aleatória.
 
-O conjunto de validação escolhe hiperparâmetros e limiar. Em seguida, o pipeline selecionado é reajustado em treino mais validação. O teste é avaliado após essa escolha. As predições de validação salvas vêm do modelo treinado **antes** do reajuste e não são uma avaliação independente do pipeline final.
+O conjunto de validação escolhe família de algoritmo, hiperparâmetros e limiar. Em seguida, o pipeline selecionado é reajustado em treino mais validação. O teste é avaliado após essa escolha. As predições de validação salvas vêm do modelo treinado **antes** do reajuste e não são uma avaliação independente do pipeline final.
 
 ## 🛡️ Riscos de vazamento e fronteiras
 
 - `P_(t+1)`, `actual_change` e `target` não são atributos; alterar o preço futuro não deve alterar os atributos de `t`.
-- Dados do teste não são usados para escolher `C`, pesos ou limiar; `select_model` recebe apenas treino e validação.
+- Dados do teste não são usados para escolher família de algoritmo, hiperparâmetros ou limiar; `select_model` recebe apenas treino e validação, e há teste que inspeciona sua assinatura.
 - Transformações não são ajustadas no conjunto completo antes da divisão.
 - A hipótese de que cada preço do mês estava disponível ao fechar o mês não pode ser verificada para as coletas sem data; isso é uma limitação de disponibilidade, não uma prova de vazamento.
 - Série contínua e alvo observado são critérios de seleção; os resultados não se aplicam automaticamente às séries excluídas.
 
-Os testes sintéticos em [tests](../tests/) verificam, entre outros pontos, separação das séries, lacunas, janela histórica, alvos e ajuste do pré-processamento. Como referência adicional sobre o risco de contaminação do conjunto de teste, consulte as [recomendações do scikit-learn para evitar vazamento](https://scikit-learn.org/stable/common_pitfalls.html#data-leakage).[^1]
+Os 25 testes sintéticos em [tests](../tests/) verificam, entre outros pontos, separação das séries, lacunas, janela histórica, alvos, ajuste do pré-processamento e o fato de que `select_model` não aceita o conjunto de teste em sua assinatura. Como referência adicional sobre o risco de contaminação do conjunto de teste, consulte as [recomendações do scikit-learn para evitar vazamento](https://scikit-learn.org/stable/common_pitfalls.html#data-leakage).[^1]
 
 [^1]: Scikit-learn, *Common pitfalls and recommended practices: Data leakage*, https://scikit-learn.org/stable/common_pitfalls.html#data-leakage.

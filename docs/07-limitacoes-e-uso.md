@@ -4,34 +4,57 @@
 
 O teste cobre observações elegíveis entre setembro de 2025 e agosto de 2026, com dois meses anteriores consecutivos e preço observado no mês-alvo. Trata-se de produtos, marcas, quantidades e estabelecimentos representados na fonte. Uma série ausente ou interrompida é excluída em vez de receber preços interpolados.
 
-A continuidade necessária seleciona a amostra e pode deixar de fora produtos mais voláteis, itens descontinuados ou estabelecimentos com coleta irregular. Assim, o desempenho medido não deve ser generalizado automaticamente a todos os produtos, supermercados, consumidores ou localidades.
+A continuidade necessária reduz 43.948 observações mensais a 17.002 exemplos e seleciona a amostra: pode deixar de fora produtos mais voláteis, itens descontinuados ou estabelecimentos com coleta irregular. O desempenho medido não deve ser generalizado automaticamente a todos os produtos, supermercados, consumidores ou localidades.
 
 ## 🧾 Limitações da observação
 
-- **Marcas e descrições:** a categoria de marca não informada pode reunir marcas distintas; nomes diferentes também podem separar produtos equivalentes. Isso altera a interpretação de “mesmo produto”.
-- **Embalagens e unidades:** quantidade numérica faz parte da chave, mas suas unidades físicas não estão documentadas em todas as categorias. Não se devem comparar diretamente `PPK` ou preços de unidades incompatíveis.
-- **Preços extremos:** podem refletir erro, promoção, mudança de produto ou uma alta real. Nenhum extremo é removido automaticamente; uma investigação com dados de origem é necessária antes de classificá-lo como erro.
-- **Data de coleta:** sua ausência após outubro de 2025 impede confirmar se cada preço estava disponível ao final do mês de referência. A comparação entre meses de referência mantém utilidade exploratória, mas a hipótese de disponibilidade precisa ser validada.
-- **Método de coleta:** mudanças de cobertura, lojas, metodologia e frequência podem alterar a distribuição dos dados. A planilha, isoladamente, não explica todas essas mudanças.
+- **Marcas e descrições:** 9.346 registros não têm marca, e a categoria `(não informada)` pode reunir marcas distintas; nomes diferentes também podem separar produtos equivalentes. Isso altera a interpretação de "mesmo produto".
+- **Embalagens e unidades:** a quantidade numérica faz parte da chave, mas suas unidades físicas não estão documentadas em todas as categorias. Não se devem comparar diretamente `PPK` ou preços de unidades incompatíveis.
+- **Preços extremos:** podem refletir erro, promoção, mudança de produto ou alta real. Nenhum extremo é removido automaticamente; classificá-lo como erro exige investigação com os dados de origem.
+- **Data de coleta:** está ausente em **100% dos registros a partir de novembro de 2025**, o que abrange 10 dos 12 meses-alvo do teste. Não é possível confirmar se cada preço estava disponível ao fim do mês de referência nesse período. Isso não é evidência de vazamento, mas é uma hipótese que permanece não testável sobre a maior parte do teste.
+- **Método de coleta:** mudanças de cobertura, lojas, metodologia e frequência podem alterar a distribuição dos dados. A planilha, isoladamente, não explica essas mudanças.
 
 ## 📉 Limitações estatísticas
 
-A avaliação usa um único recorte cronológico de validação e um de teste; as observações da mesma série e do mesmo mês não são necessariamente independentes. Não foram calculados intervalos de confiança nem executada avaliação temporal repetida. Comparações por produto e supermercado não controlam multiplicidade nem garantem que diferenças entre grupos sejam estáveis.
+A avaliação usa um **único** recorte cronológico de validação e um de teste. Não há avaliação temporal deslizante, que mediria estabilidade em várias janelas.
 
-Inflação, custos de produção, promoções, sazonalidade econômica, impostos, disponibilidade e outros fatores podem afetar preços sem estar medidos explicitamente. Uma mudança nessas relações pode degradar a classificação e a calibração. A regressão logística fornece associações condicionais, não identifica causas.
+As observações da mesma série não são independentes: 3.180 linhas de teste vêm de 785 séries, 4,1 por série. Os intervalos de confiança reportados **já tratam essa dependência**, reamostrando séries inteiras em vez de linhas isoladas; um intervalo calculado linha a linha seria estreito demais. Ainda assim, o bootstrap não corrige dependência *entre* séries do mesmo produto ou supermercado, nem choques de preço que atingem muitas séries no mesmo mês.
 
-O limite de decisão foi selecionado no conjunto de validação e transferido ao modelo reajustado. O conjunto de teste não foi usado nessa seleção, mas novas mudanças após examinar o teste exigiriam outro período independente para avaliação imparcial. O limite de 0,25 selecionado nesta execução não deve ser interpretado como escolha universal.
+Comparações por produto e supermercado **não controlam multiplicidade**: com dezenas de grupos avaliados, algumas diferenças extremas aparecem por acaso. Os recalls de 0,986 da batata e 0,389 do pão francês devem ser lidos junto com o número de positivos de cada grupo.
+
+**Otimismo de seleção:** 408 pares configuração-limiar foram avaliados no mesmo conjunto de validação. O teste temporal independente existe para medir o efeito disso. Na execução documentada a queda esperada não se materializou, mas uma reavaliação exigiria reservar novo período.
+
+**Diagnóstico posterior por família:** a coluna de métricas de teste por algoritmo foi calculada depois de fechada a seleção e não realimentou escolha alguma. Ela não deve ser usada para afirmar que outra família "seria melhor" — a diferença entre as quatro no teste é menor que a meia-largura do intervalo de confiança do próprio F1.
+
+Inflação, custos de produção, promoções, sazonalidade econômica, impostos e disponibilidade podem afetar preços sem estar medidos. Uma mudança nessas relações degrada classificação e calibração.
+
+## 🔗 Colinearidade e interpretação
+
+Os atributos de preço são fortemente redundantes, e em quatro casos a redundância é **exata**: `rolling_mean_3m` é, por construção, `(price_current + price_lag_1 + price_lag_2) / 3`. O VIF desses quatro atributos é infinito (`reports/collinearity.csv`), e `rolling_max_3m`, `rolling_min_3m` e `rolling_std_3m` ficam acima de 1.000.
+
+Consequência direta: **os coeficientes individuais da regressão logística não são interpretáveis neste conjunto de atributos**, porque a repartição de peso entre variáveis perfeitamente colineares é matematicamente indeterminada. A predição não é afetada; apenas a leitura atributo a atributo é. Por isso a interpretação do projeto usa importância por permutação, descrita em [modelos comparados](03-modelos-comparados.md), e a figura de coeficientes só é gerada quando a família vencedora é linear, acompanhada de aviso explícito.
+
+Importância por permutação também é associação, não causa. Um atributo redundante pode mostrar importância baixa apenas porque outro carrega a mesma informação.
+
+## 📈 Deriva de nível de preço
+
+O nível médio de preço sobe de R$ 12,83 no treino para R$ 15,31 no teste, deriva de cerca de 19% entre as partições. Um modelo que dependesse do nível absoluto tenderia a degradar.
+
+A importância por permutação mostra que **o modelo praticamente ignora os níveis** e concentra o sinal em `variation_1m` e `variation_2m`, o que o protege dessa deriva na prática. Essa é uma constatação empírica sobre a execução documentada, não uma garantia estrutural: atributos de nível continuam presentes na lista e poderiam ser usados por outra configuração. Uma versão futura poderia normalizar os preços pela própria série e eliminar o risco por construção.
 
 ## 🚫 O que o modelo não entrega
 
 - Não calcula o preço de `t+1`, a magnitude da alta nem o impacto monetário para uma cesta individual.
 - Não garante que um produto específico aumentará ou permanecerá estável.
-- Não substitui índice oficial de inflação ou aconselhamento financeiro.
-- Não implementa rotina operacional separada para prever o último mês sem alvo conhecido: `build_supervised` retorna apenas exemplos históricos elegíveis com alvo observado.
+- Não substitui índice oficial de inflação nem aconselhamento financeiro.
+- Não estima retorno financeiro: o custo de um falso alarme e o prejuízo de uma alta não detectada não estão na base, e sem eles o limiar de 0,25 não é uma escolha final.
+- Não implementa rotina prospectiva: `build_supervised` retorna apenas exemplos históricos com alvo observado.
 - Não verifica a proveniência individual de uma coleta cuja data esteja ausente.
 
-Uma probabilidade de 0,40 deve ser entendida como estimativa condicional do modelo, sujeita à calibração e às diferenças entre dados futuros e treinamento. Ela não significa certeza de aumento de 40% no preço.
+Uma probabilidade de 0,40 é estimativa condicional do modelo, sujeita à calibração e às diferenças entre dados futuros e de treinamento. Ela não significa certeza de aumento de 40% no preço.
 
 ## 🔎 Investigações futuras possíveis
 
-Antes de uma aplicação prática, seria útil obter documentação da fonte e datas de coleta, validar identidade de produtos e unidades, examinar os extremos, testar janelas temporais adicionais com reserva de um teste final novo e avaliar incerteza por mês e série. Também seria necessário definir custos de falsos alertas e de altas não detectadas para escolher um limiar apropriado. Essas propostas são possibilidades de pesquisa; não são resultados do projeto atual.
+Antes de uma aplicação prática: definir com a organização destinatária o custo de cada tipo de erro e reposicionar o limiar sobre a curva de trade-off; substituir a janela única por avaliação temporal deslizante com novo período final reservado; incorporar preços ao produtor como atributo defasado para testar atraso de repasse; normalizar preços pela própria série para eliminar por construção a dependência de nível; obter documentação da pesquisa de coleta para validar unidades, identidade de produto e disponibilidade.
+
+Essas propostas são possibilidades de pesquisa, não resultados do projeto atual.
