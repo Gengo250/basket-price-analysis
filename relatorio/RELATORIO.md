@@ -1,7 +1,15 @@
 # Previsão de altas de preço na cesta básica
 
-**Disciplina:** Aprendizado de Máquina — 6º semestre · **Trabalho 2 (extensão)**
-**Base:** `ICB_DADOS_2026.xlsx`, aba `ACUMUL_DESAGREG` — 46.264 coletas de preço em 51 estabelecimentos e 30 produtos, de setembro/2022 a agosto/2026.
+**Disciplina:** Sistemas Inteligentes e Aprendizado de Máquina (13134) · **Trabalho 2 (extensão)**\
+**Professor:** Fernando Soares de Aguiar Neto
+
+**Integrantes:**
+
+- Gabriel Cattuzo — RA 24015324
+- Guilherme Dias Cavalheri — RA 24013423
+- Miguel Gengo — RA 24009007
+
+**Base:** `ICB_DADOS_2026.xlsx`, aba `ACUMUL_DESAGREG` — 46.264 coletas de preço em 51 estabelecimentos e 30 produtos, de setembro/2022 a agosto/2026.\
 **Execução documentada:** `20261125_141318_918857_a808538b_comparacao`. Todas as figuras e tabelas citadas estão em `figuras/` e `tabelas/`, copiadas dessa execução por `publish_report_assets`.
 
 ---
@@ -249,7 +257,7 @@ Nos 12 meses de teste, o recall ficou entre **0,559** (março/2026) e **0,860** 
 
 ![Recall por produto](figuras/product_performance.png)
 
-Entre produtos com pelo menos 30 observações, o contraste é grande: batata (recall 0,986), café (0,962) e frango peito (0,936) no topo; pão francês (0,389), óleo (0,390) e feijão (0,394) na base. O custo aparece na precisão: café gera 138 falsos positivos e arroz 112, contra precisão de 0,270 e 0,273.
+Entre produtos com pelo menos 30 observações, o contraste é grande: batata (recall 0,986), café (0,962) e banana nanica (0,940) no topo; pão francês (0,389), óleo (0,390) e feijão (0,394) na base. O custo aparece na precisão: café gera 138 falsos positivos e arroz 112, contra precisão de 0,270 e 0,273.
 
 A hipótese natural é que itens mais voláteis tenham altas mais detectáveis, e os dados apontam nessa direção **sem confirmá-la**: a correlação entre o desvio padrão da variação mensal do produto e seu recall é de r = +0,343, mas com apenas 14 produtos isso não é significativo (p = 0,23). Há contraexemplos claros — o arroz é o produto **menos** volátil da lista (desvio 0,070) e ainda assim tem recall 0,857, enquanto o pão francês, mais volátil que ele (0,135), tem recall 0,389. A hipótese fica registrada como pergunta em aberto, não como explicação. Essas comparações são descritivas e não controlam multiplicidade.
 
@@ -305,7 +313,7 @@ O ranking de F1 observado mudou entre validação e teste. A seleção foi feita
 
 ```bash
 uv sync
-uv run pytest -q                 # 25 testes
+uv run pytest -q                 # 28 testes
 uv run python -c "from basket_price_prediction.experiments import run_training; print(run_training())"
 ```
 

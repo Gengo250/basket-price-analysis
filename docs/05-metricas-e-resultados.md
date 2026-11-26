@@ -110,7 +110,7 @@ Importância baixa não prova irrelevância: atributos redundantes dividem o cr�
 
 Nos 12 meses de teste, o recall variou de **0,559** (março/2026, 59 positivos) a **0,860** (janeiro/2026, 100 positivos). A precisão variou de 0,341 a 0,558. As correlações descritivas entre a posição do mês e o F1, recall e precisão foram, respectivamente, +0,053, −0,398 e +0,211. A estabilidade em outros períodos permanece em aberto.
 
-Entre produtos com pelo menos 30 observações, batata (recall 0,986), café (0,962) e frango peito (0,936) lideram; pão francês (0,389), óleo (0,390) e feijão (0,394) ficam na base. O custo aparece na precisão — café gera 138 falsos positivos e arroz 112, com precisão de 0,270 e 0,273.
+Entre produtos com pelo menos 30 observações, batata (recall 0,986), café (0,962) e banana nanica (0,940) lideram; pão francês (0,389), óleo (0,390) e feijão (0,394) ficam na base. O custo aparece na precisão — café gera 138 falsos positivos e arroz 112, com precisão de 0,270 e 0,273.
 
 A hipótese de que produtos mais voláteis tenham altas mais detectáveis **não se confirma** com os dados disponíveis: a correlação entre o desvio padrão da variação mensal do produto e seu recall é r = +0,343, não significativa com 14 produtos (p = 0,23). O arroz é o menos volátil da lista (0,070) e tem recall 0,857; o pão francês é mais volátil (0,135) e tem recall 0,389. A hipótese permanece em aberto.
 

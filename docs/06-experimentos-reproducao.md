@@ -14,7 +14,7 @@
 | `evaluation.py` | Métricas, bootstrap por série, colinearidade, perfil de risco e regras de referência. |
 | `visualization.py` | Figuras de avaliação, comparação, intervalos e importância. |
 | `experiments.py` | Criação de execução, persistência, publicação do relatório e recarga. |
-| `tests/` | 25 verificações focadas com dados sintéticos. |
+| `tests/` | 28 verificações focadas com dados sintéticos. |
 | `runs/results/` | Saídas locais de cada execução de treinamento. |
 | `relatorio/` | Relatório consolidado e cópia versionada de figuras e tabelas. |
 
@@ -94,7 +94,7 @@ Só execuções com status `complete` podem alimentar o relatório. O texto de `
 uv run pytest -q
 ```
 
-Os 25 testes cobrem o limite estrito de 2%, ausência de mês seguinte, lacunas, lags, separação de séries, divisão temporal, ajuste do transformador somente no treino, ajuste e predição de cada uma das quatro famílias, aplicação do piso de precisão e do *fallback* no critério de seleção, uma linha por família na comparação, reprodutibilidade e cobertura dos intervalos de bootstrap, reamostragem por blocos de série, detecção de combinação linear exata pelo VIF, separação do regime de preço inalterado no perfil de risco, criação de diretórios distintos e recarga de artefatos.
+Os 28 testes cobrem o limite estrito de 2%, ausência de mês seguinte, lacunas, lags, separação de séries, divisão temporal, ajuste do transformador somente no treino, ajuste e predição de cada uma das quatro famílias, aplicação do piso de precisão e do *fallback* no critério de seleção, uma linha por família na comparação, reprodutibilidade e cobertura dos intervalos de bootstrap, reamostragem por blocos de série, detecção de combinação linear exata pelo VIF, separação do regime de preço inalterado no perfil de risco, criação de diretórios distintos e recarga de artefatos.
 
 Eles usam amostras sintéticas pequenas e não alteram a planilha original. Uma passagem apoia a verificação dos contratos cobertos; não prova qualidade dos dados de origem nem desempenho futuro.
 

@@ -57,6 +57,6 @@ O conjunto de validação escolhe família de algoritmo, hiperparâmetros e limi
 - A hipótese de que cada preço do mês estava disponível ao fechar o mês não pode ser verificada para as coletas sem data; isso é uma limitação de disponibilidade, não uma prova de vazamento.
 - Série contínua e alvo observado são critérios de seleção; os resultados não se aplicam automaticamente às séries excluídas.
 
-Os 25 testes sintéticos em [tests](../tests/) verificam, entre outros pontos, separação das séries, lacunas, janela histórica, alvos, ajuste do pré-processamento e o fato de que `select_model` não aceita o conjunto de teste em sua assinatura. Como referência adicional sobre o risco de contaminação do conjunto de teste, consulte as [recomendações do scikit-learn para evitar vazamento](https://scikit-learn.org/stable/common_pitfalls.html#data-leakage).[^1]
+Os 28 testes sintéticos em [tests](../tests/) verificam, entre outros pontos, separação das séries, lacunas, janela histórica, alvos, ajuste do pré-processamento e o fato de que `select_model` não aceita o conjunto de teste em sua assinatura. Como referência adicional sobre o risco de contaminação do conjunto de teste, consulte as [recomendações do scikit-learn para evitar vazamento](https://scikit-learn.org/stable/common_pitfalls.html#data-leakage).[^1]
 
 [^1]: Scikit-learn, *Common pitfalls and recommended practices: Data leakage*, https://scikit-learn.org/stable/common_pitfalls.html#data-leakage.

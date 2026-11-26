@@ -50,7 +50,7 @@ uv run pytest -q
 - `data/`: planilha original preservada.
 - `notebooks/`: explicações, exploração, comparação de modelos e avaliação.
 - `src/basket_price_prediction/`: carregamento, limpeza, atributos, treinamento, avaliação, gráficos e experimentos.
-- `tests/`: 25 testes sintéticos de rótulos, lacunas, separação, famílias de algoritmos, critério de seleção, bootstrap, colinearidade, perfil de risco e persistência.
+- `tests/`: 28 testes sintéticos de rótulos, lacunas, separação, famílias de algoritmos, critério de seleção, bootstrap, colinearidade, perfil de risco e persistência.
 - `docs/`: explicações técnicas e teóricas do projeto e dos modelos.
 - `relatorio/`: relatório do trabalho, modelo individual de extensão e cópia versionada de figuras e tabelas.
 - `runs/results/<experimento>/`: configuração e métricas JSON, resumo de dados, manifesto, pipeline `joblib`, predições separadas, figuras e relatórios.
