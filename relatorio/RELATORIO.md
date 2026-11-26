@@ -14,7 +14,7 @@ Cada exemplo é uma série `(supermercado, produto, marca, quantidade)` observad
 
 ### Por que 2%
 
-O limite não é arbitrário, e a própria base justifica a escolha. Entre as 17.002 transições mensais elegíveis:
+O corte de 2% define o evento de interesse. A distribuição das 17.002 transições mensais elegíveis dá contexto à escolha.
 
 | Faixa de variação mensal | Participação |
 | --- | ---: |
@@ -22,7 +22,7 @@ O limite não é arbitrário, e a própria base justifica a escolha. Entre as 17
 | Estável, dentro de ±2% | **43,5%** |
 | Alta maior que 2% | 29,2% |
 
-A mediana da variação mensal é exatamente **0,000**, e isso não é um detalhe: em **36,4% das transições o preço não muda nem um centavo**. Preço de supermercado é rígido — fica parado por meses e então salta. A faixa de ±2% isola justamente essa zona de rigidez e de reprecificação rotineira, deixando de um lado as altas que representam movimento real. O corte também é economicamente relevante: **2% ao mês compostos equivalem a 26,8% ao ano**, muito acima da meta de inflação brasileira. Um item que cruza esse limite não está acompanhando a inflação — está encarecendo acima dela.
+A mediana da variação mensal foi zero. Em 36,4% das transições o preço ficou exatamente igual. O corte permite estudar altas acima de uma margem definida, enquanto 43,5% das transições ficaram na faixa de ±2%.
 
 ---
 
@@ -30,7 +30,7 @@ A mediana da variação mensal é exatamente **0,000**, e isso não é um detalh
 
 ### Objetivo
 
-Determinar **se existe sinal preditivo aproveitável** no histórico recente de preços da cesta básica e **quantificar esse sinal com incerteza**, de modo que uma organização possa decidir se vale a pena construir um alerta de alta sobre esses dados — e com qual custo de falsos alarmes.
+Avaliar se um modelo que usa o histórico recente de preços e as características de cada série antecipa altas relevantes, e quantificar o desempenho para informar o possível uso de alertas.
 
 ### Motivação e aplicação esperada
 
@@ -38,14 +38,14 @@ A cesta básica consome a maior fatia do orçamento de famílias de baixa renda,
 
 O conhecimento produzido aqui tem dois destinatários diretos:
 
-1. **Organizações de assistência alimentar e compras coletivas** (bancos de alimentos, cozinhas comunitárias, associações de bairro), que compram em volume e têm alguma capacidade de estoque. Para elas, um aviso de que determinado item tende a subir acima de 2% no mês seguinte é acionável: antecipa-se a compra daquele item. O erro é barato — comprar antes um item que não subiu custa apenas capital de giro e espaço de estoque.
+1. **Organizações de assistência alimentar e compras coletivas** (bancos de alimentos, cozinhas comunitárias e associações de bairro), que podem usar o alerta para avaliar se vale antecipar a compra de um item.
 2. **Programas de educação financeira e defesa do consumidor** (Procon, extensão universitária), que podem usar o modelo para dirigir a atenção aos itens e estabelecimentos de maior risco de alta no mês, em vez de tratar a cesta inteira de maneira uniforme.
 
-A assimetria de custo entre os dois tipos de erro é o que torna a aplicação viável mesmo com precisão moderada: **deixar de avisar uma alta real (falso negativo) custa mais do que avisar uma alta que não veio (falso positivo)**. Essa assimetria é a justificativa metodológica para toda a configuração do estudo — a escolha de um limiar baixo, a métrica F1 e o piso de precisão descritos na Seção 3.
+Um alerta pode ajudar a priorizar o acompanhamento de itens ou a planejar compras. A importância de cada tipo de erro depende da aplicação e dos custos de estoque, capital de giro e compra. A base permite contar falsos alertas e altas sem alerta. A avaliação do custo financeiro exigiria dados adicionais.
 
-### Critério de sucesso declarado antes do resultado
+### Critério de avaliação
 
-O estudo é considerado bem-sucedido se o modelo **superar com significância estatística** duas referências sem treinamento: prever sempre "sem alta" e repetir a alta do mês anterior. Se não superar, a conclusão honesta é que o histórico de preços isolado não sustenta um alerta, e a resposta à questão é negativa.
+A avaliação compara o F1 com a regra de repetir a alta anterior e a acurácia balanceada com a regra de nunca emitir alerta. Os intervalos de 95% das diferenças, estimados por bootstrap pareado por série, indicam se houve ganho nas métricas avaliadas sob esse esquema de reamostragem.
 
 ---
 
@@ -112,7 +112,7 @@ Um único critério, aplicado ao conjunto todo e repetido dentro de cada famíli
 
 > **Maior F1 da classe positiva entre os candidatos com precisão ≥ 0,35 na validação.** Desempate por maior precisão, depois menor limiar, depois nome do algoritmo.
 
-F1 porque a assimetria de custo da Seção 2 exige equilibrar recall e precisão, e acurácia é inútil aqui — prever sempre "sem alta" já acerta 71,1%. O piso de precisão de 0,35 impede que o critério degenere para um modelo que grita "alta!" o tempo todo: sem ele, o melhor F1 da grade sai de um candidato com precisão de 0,20. Esse piso é decisão metodológica declarada, não garantia de precisão futura.
+O F1 foi usado para combinar precisão e recall em uma única métrica. O piso de 35% restringe a seleção a candidatos com precisão mínima na validação, quando há candidatos elegíveis. Nesta execução, o maior F1 da grade já era da random forest, com precisão de 40,2% na validação. Aplicar o piso manteve a mesma escolha.
 
 Escolhida a configuração, o pipeline é **reajustado em treino + validação** e avaliado **uma única vez** no teste.
 
@@ -122,7 +122,7 @@ Além de precisão, recall, F1, acurácia, acurácia balanceada, ROC-AUC, averag
 
 As 3.180 observações de teste **não são independentes** — vêm de 785 séries, 4,1 observações por série, e a mesma série aparece em meses consecutivos. Tratar cada linha como observação independente infla a confiança. Por isso os intervalos de confiança usam **bootstrap por série**: cada reamostra sorteia 785 séries *inteiras* com reposição, preservando a dependência interna. São 2.000 reamostras, nível de 95%.
 
-A mesma reamostragem produz o intervalo da **diferença** entre o modelo e cada referência. É esse intervalo que responde se o ganho é real ou ruído amostral.
+Para cada reamostra, modelo e regra de referência são avaliados nas mesmas séries sorteadas. Calcula-se a diferença da métrica e estima-se seu intervalo pelos percentis da distribuição reamostrada.
 
 ---
 
@@ -144,7 +144,7 @@ A mesma reamostragem produz o intervalo da **diferença** entre o modelo e cada 
 Dois pontos de honestidade que a tabela deixa visíveis:
 
 - **A coluna de teste é diagnóstico posterior, não critério.** Foi calculada depois que a seleção já estava fechada na validação, e não realimentou nenhuma escolha. Está no relatório por transparência.
-- **O vencedor na validação não foi o vencedor no teste.** O gradient boosting teve o melhor F1 de teste (0,534) apesar de ser o segundo na validação. As quatro famílias ficam dentro de uma faixa de 0,04 em F1 de teste, menor que a largura do intervalo de confiança do próprio F1 (±0,02). A leitura correta é que **as famílias são estatisticamente próximas neste problema** e que a ordem entre elas não é estável — não que o gradient boosting "seria melhor". Trocar a escolha depois de ver o teste transformaria o teste em conjunto de seleção.
+- O gradient boosting obteve o maior F1 observado no teste (0,534), seguido pela random forest (0,517). A comparação entre famílias no teste é descritiva. Um intervalo para o F1 da random forest quantifica a incerteza da sua própria estimativa. Uma inferência sobre o ganho de uma família sobre outra exigiria um intervalo da diferença pareada, com as mesmas séries reamostradas. A random forest foi selecionada pelo desempenho na validação.
 
 ### 4.2 Desempenho do modelo selecionado
 
@@ -171,7 +171,7 @@ Dois pontos de honestidade que a tabela deixa visíveis:
 | Average precision | 0,538 | [0,506 – 0,571] |
 | Brier | 0,178 | [0,172 – 0,185] |
 
-### 4.4 Comparação com as referências — o teste de significância
+### 4.4 Comparação com as referências e incerteza das diferenças
 
 | Resultado | Modelo | Sempre "sem alta" | Repete alta anterior |
 | --- | ---: | ---: | ---: |
@@ -185,7 +185,7 @@ Dois pontos de honestidade que a tabela deixa visíveis:
 | Ganho de F1 sobre "repete alta anterior" | **[+0,267 – +0,326]** | Não |
 | Ganho de acurácia balanceada sobre "sempre sem alta" | **[+0,123 – +0,157]** | Não |
 
-Ambos os intervalos excluem zero com folga: **o ganho sobre as duas referências é estatisticamente significativo**, mesmo contabilizando a dependência entre meses da mesma série. O critério de sucesso declarado na Seção 2 foi atingido.
+Os dois intervalos das diferenças ficaram acima de zero. Isso indica ganho no teste retrospectivo e nas métricas de cada comparação, sob o bootstrap por série. A reamostragem preserva a dependência dentro de cada série. Choques que afetam várias séries podem gerar dependência entre elas.
 
 A acurácia do modelo (0,591) é *menor* que a de prever sempre "sem alta" (0,711), e isso é esperado e desejado: o modelo troca acerto na classe majoritária por capturar 696 das 919 altas reais, enquanto a regra trivial captura zero.
 
@@ -206,7 +206,7 @@ Importância por permutação sobre os atributos de entrada — comparável entr
 
 ![Risco por faixa de variação anterior](figuras/risk_by_variation.png)
 
-O risco observado por faixa da variação anterior, medido **no treino** (`tabelas/risk_by_variation.csv`), mostra o mecanismo que o modelo explora:
+O risco observado por faixa da variação anterior, medido **no treino** (`tabelas/risk_by_variation.csv`), descreve a associação entre a variação recente e a alta no mês seguinte:
 
 | Variação no mês anterior | Observações | P(alta > 2% no mês seguinte) |
 | --- | ---: | ---: |
@@ -224,7 +224,7 @@ O risco observado por faixa da variação anterior, medido **no treino** (`tabel
 
 O padrão dominante é **reversão à média após quedas**: quem caiu mais de 20% tem 64,3% de chance de subir acima de 2% no mês seguinte, contra a prevalência geral de 29,9%. O risco cai de forma praticamente monótona até o mínimo, que ocorre no regime de **preço inalterado** (0,204) — preço parado tende a continuar parado. Do lado positivo há uma elevação modesta em 2 a 5% (0,313), mas muito menor que a do lado negativo: a relação é **assimétrica**, com queda acentuada à esquerda e quase plana à direita.
 
-O achado mais importante: **o sinal está nas variações relativas, não nos níveis de preço**. Os preços em reais contribuem com importância nula ou negativa. Isso tem uma consequência metodológica favorável — o nível médio de preço sobe de R$ 12,83 no treino para R$ 15,31 no teste (deriva inflacionária de ~19%), e um modelo que dependesse de nível absoluto degradaria entre as partições. Como o modelo essencialmente ignora o nível, ele está protegido dessa deriva na prática.
+As variações de um e dois meses tiveram as maiores importâncias individuais por permutação nessa execução. Atributos de preço correlacionados podem compartilhar informação, o que dificulta interpretar uma importância baixa. A diferença média de preços entre treino e teste descreve a amostra, com possíveis mudanças na composição dos itens. A robustez a mudanças no nível de preços exigiria uma avaliação específica.
 
 ### 4.6 Colinearidade: por que não se lê coeficiente aqui
 
@@ -239,13 +239,13 @@ O achado mais importante: **o sinal está nas variações relativas, não nos n�
 | `variation_1m`, `variation_2m` | 25–30 | entre si |
 | `month_sin`, `month_cos` | ≈ 1,0 | — |
 
-O VIF é **infinito**, não apenas alto, para quatro atributos: `rolling_mean_3m` é por construção `(price_current + price_lag_1 + price_lag_2) / 3`, uma combinação linear **exata** dos outros três. A consequência é direta e deve ser dita: **os coeficientes individuais da regressão logística não são interpretáveis neste conjunto de atributos** — a atribuição de peso entre variáveis perfeitamente colineares é indeterminada. É por isso que este relatório usa importância por permutação, que mede o efeito de destruir a informação do atributo e não sofre desse problema. A predição não é afetada; apenas a leitura atributo a atributo é.
+O VIF é **infinito**, não apenas alto, para quatro atributos: `rolling_mean_3m` é por construção `(price_current + price_lag_1 + price_lag_2) / 3`, uma combinação linear **exata** dos outros três. A consequência é direta e deve ser dita: **os coeficientes individuais da regressão logística não são interpretáveis neste conjunto de atributos** — a atribuição de peso entre variáveis perfeitamente colineares é indeterminada. O relatório usa importância por permutação para medir a mudança de desempenho ao embaralhar cada atributo. Atributos redundantes também afetam essa leitura, pois outras variáveis podem carregar informação semelhante.
 
 ### 4.7 Estabilidade ao longo do tempo e entre produtos
 
 ![Desempenho mensal](figuras/monthly_performance.png)
 
-Nos 12 meses de teste o recall fica entre **0,559** (março/2026) e **0,860** (janeiro/2026); a precisão, entre 0,341 e 0,558. Não há degradação sistemática ao longo do período: a correlação entre a posição do mês e o F1 é de r = +0,053 (p = 0,87), e nem recall (r = −0,398, p = 0,20) nem precisão (r = +0,211, p = 0,51) mostram tendência significativa. Isso é relevante porque o modelo foi ajustado com dados até agosto/2025 e o último mês avaliado é agosto/2026.
+Nos 12 meses de teste, o recall ficou entre **0,559** (março/2026) e **0,860** (janeiro/2026), e a precisão ficou entre 0,341 e 0,558. As correlações com a posição do mês foram r = +0,053 (p = 0,87) para F1, r = −0,398 (p = 0,20) para recall e r = +0,211 (p = 0,51) para precisão. Com 12 meses, esses resultados são descritivos e a estabilidade em outros períodos permanece em aberto.
 
 ![Recall por produto](figuras/product_performance.png)
 
@@ -261,9 +261,9 @@ A curva de calibração por decis acompanha a diagonal na faixa central de proba
 
 ## 5. Conclusão
 
-### A questão foi respondida: sim, com ressalva quantificada
+### Resposta à questão
 
-**O histórico recente de preços contém sinal preditivo real sobre altas acima de 2%.** O modelo selecionado identifica **75,7% das altas** (IC 95%: 72,5%–79,0%), contra 21,7% da regra "repete a alta anterior" e 0% da regra "sempre sem alta". O ganho de F1 sobre a melhor referência é de **+0,296, com IC 95% de +0,267 a +0,326** — intervalo que exclui zero com folga, calculado reamostrando séries inteiras para não inflar a confiança pela dependência temporal. O ROC-AUC de 0,715 e a average precision de 0,538, contra prevalência de 0,289, confirmam capacidade de ordenação bem acima do acaso.
+**Na amostra do teste retrospectivo, o modelo com histórico de preços e características das séries apresentou desempenho superior às regras de referência nas métricas avaliadas.** Identificou **75,7% das altas** (IC 95%: 72,5%–79,0%). O ganho de F1 sobre repetir a alta anterior foi de **0,296** (IC 95%: **+0,267 a +0,326**), e o ganho de acurácia balanceada sobre nunca alertar teve IC 95% de **+0,123 a +0,157**. Medir a contribuição específica do histórico exigiria comparar modelos com e sem esses atributos nas mesmas observações.
 
 **A ressalva é a precisão: 0,392.** Dos 1.774 alertas emitidos, 1.078 (60,8%) não corresponderam a altas acima de 2%. Qualquer aplicação precisa conviver com três alarmes falsos a cada cinco emitidos.
 
@@ -271,17 +271,17 @@ A curva de calibração por decis acompanha a diagonal na faixa central de proba
 
 | Objetivo declarado na Seção 2 | Situação |
 | --- | --- |
-| Determinar se há sinal preditivo aproveitável | **Atingido.** Sinal confirmado com significância estatística sobre duas referências. |
-| Quantificar o sinal com incerteza | **Atingido.** Todas as métricas têm IC 95% por bootstrap de séries. |
-| Permitir decidir se vale construir um alerta | **Atingido com ressalva.** O custo (61% de falsos alarmes) está medido, mas o benefício monetário não — o estudo não estima o ganho financeiro de antecipar uma compra. |
+| Avaliar o desempenho do modelo com histórico e características das séries | **Atingido.** Os intervalos das diferenças ficaram acima de zero nas métricas avaliadas contra cada referência. |
+| Quantificar o desempenho com incerteza | **Atingido.** As oito métricas da tabela de avaliação têm IC 95% por bootstrap de séries. |
+| Informar o possível uso de alertas | **Atingido com ressalva.** A avaliação quantifica falsos alertas e altas sem alerta. O impacto financeiro permanece em aberto. |
 
-A decisão de levar o modelo adiante depende de um número que **não está nesta base**: quanto custa estocar antecipadamente um item que não subiu, versus quanto se perde comprando um item que subiu 5%. Enquanto esse custo não for definido pela organização que vai usar o alerta, o limiar de 0,25 não deve ser tratado como escolha final — ele veio de um critério genérico de F1, não de uma análise de custo. A curva `figuras/threshold_tradeoff.png` permite reposicionar esse limiar assim que os custos reais forem conhecidos.
+A decisão de levar o modelo adiante depende do custo de antecipar uma compra e do prejuízo de deixar passar uma alta. O limiar de 0,25 decorre do critério de seleção na validação. A curva de precisão e recall por limiar usa as predições do teste e descreve o desempenho retrospectivo. Uma revisão do limiar deve ser feita no desenvolvimento, com validação cronológica e um período reservado para avaliação.
 
 ### Discussão: o que a comparação de algoritmos ensinou
 
-A hipótese inicial do projeto era que a regressão logística bastava. **A comparação mostrou que não**: a random forest superou a logística em 0,079 de F1 na validação, e os dois modelos de árvore agregada ficaram à frente do modelo linear. A explicação está na tabela de risco da Seção 4.5. A relação entre variação passada e alta futura **não é monótona**, mas também não é um U simétrico: o risco despenca de 0,643 a 0,204 conforme a variação anterior vai de −20% até zero, atinge o mínimo exatamente no regime de preço inalterado, e volta a subir de forma modesta em 2 a 5%. O ponto que mais penaliza a fronteira linear é o **ponto anguloso em zero**: 36,4% das observações se concentram num único valor que também é o mínimo de risco, e um logito linear em `variation_1m` não consegue produzir um mínimo local nesse ponto com inclinações tão diferentes de cada lado. Árvores conseguem, porque isolam o regime "preço inalterado" com um corte.
+Na validação, a random forest superou a regressão logística em 0,079 de F1. No treino, a frequência de altas futuras chegou a 64,3% após quedas superiores a 20% e foi de 20,4% no grupo de preço inalterado. Esse padrão é compatível com uma relação não linear que árvores conseguem representar. O estudo comparou as famílias com seus conjuntos de atributos completos, por isso a contribuição desse padrão para a diferença de F1 permanece em aberto.
 
-Igualmente instrutivo é o segundo achado: **a diferença entre as quatro famílias (0,04 em F1 de teste) é menor que a incerteza da própria medição (±0,02 de meia-largura de IC)**, e o vencedor da validação não foi o vencedor do teste. A lição metodológica é que a escolha de algoritmo, aqui, importa menos que a construção do alvo, a validação temporal e o limiar de decisão. Teria sido fácil — e errado — apresentar o gradient boosting como "o melhor modelo" depois de olhar o teste.
+O ranking de F1 observado mudou entre validação e teste. A seleção foi feita na validação e a diferença no teste ficou registrada como descrição posterior.
 
 ### Limitações que restringem a conclusão
 
@@ -294,7 +294,7 @@ Igualmente instrutivo é o segundo achado: **a diferença entre as quatro famíl
 
 ### Próximos passos sugeridos
 
-1. Definir com a organização destinatária o custo de cada tipo de erro e reposicionar o limiar sobre a curva de trade-off.
+1. Definir com a organização destinatária o custo de cada tipo de erro e usar dados de desenvolvimento para avaliar outro limiar.
 2. Substituir a janela única de validação por avaliação temporal deslizante, reservando um período final novo para o teste.
 3. Incorporar preços ao produtor como atributo defasado e testar a hipótese de atraso de repasse entre produtor e varejo.
 4. Obter documentação da pesquisa de coleta para validar unidades, identidade de produto e disponibilidade.

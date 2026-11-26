@@ -21,7 +21,7 @@ O [guia em docs/](docs/README.md) detalha a construção do alvo, atributos temp
 - São exigidos preços nos meses consecutivos t, t−1 e t−2. O alvo é 1 se `(preço t+1 / preço t) − 1 > 0,02`; exatamente 2% pertence à classe 0. O limite de 2% é justificado pelos próprios dados: 43,5% das variações mensais ficam dentro de ±2%, em 36,4% das transições o preço não muda nem um centavo, e 2% ao mês compostos equivalem a 26,8% ao ano. Sem preço no mês-calendário seguinte, não há alvo. Entram preços e variações históricas, estatísticas da janela t−2 até t, mês cíclico e categorias; o preço futuro nunca é atributo.
 - A divisão considera o **mês-alvo**: treino setembro/2022–dezembro/2024; validação janeiro–agosto/2025; teste setembro/2025–agosto/2026. A janela histórica reduz o início efetivo do treino. Transformações são ajustadas somente nos dados de ajuste.
 - **Quatro famílias de algoritmos são comparadas** sob o mesmo pré-processamento e o mesmo critério: regressão logística, árvore de decisão, random forest e gradient boosting por histograma — 24 configurações × 17 limiares = 408 candidatos. Só a família linear recebe `StandardScaler`. O critério é maior F1 na validação com precisão ≥ 0,35, com desempate por precisão, menor limiar e nome; o fallback, se necessário, é registrado. Após a seleção, reajusta-se em treino + validação e avalia-se uma vez no teste. As predições de validação são do modelo antes do reajuste.
-- Reportam-se precisão, recall, F1, acurácia, acurácia balanceada, ROC-AUC, average precision, Brier e matriz de confusão, **todos com intervalo de confiança de 95% por bootstrap de séries inteiras** — as 3.180 observações de teste vêm de 785 séries e não são independentes. As regras sempre-zero e repetição da alta anterior são referências sem treinamento, no mesmo teste, e a mesma reamostragem produz o intervalo da diferença. Grupos sem positivos têm recall e F1 indefinidos; precisão sem previsões positivas é reportada como zero por convenção.
+- Reportam-se precisão, recall, F1, acurácia, acurácia balanceada, ROC-AUC, average precision, Brier e matriz de confusão, com IC de 95% por bootstrap de séries inteiras para as oito métricas numéricas — as 3.180 observações de teste vêm de 785 séries e não são independentes. As regras sempre-zero e repetição da alta anterior são referências sem treinamento, no mesmo teste, e a mesma reamostragem produz o intervalo da diferença. Grupos sem positivos têm recall e F1 indefinidos; precisão sem previsões positivas é reportada como zero por convenção.
 
 ## Instalação e execução
 
@@ -62,7 +62,7 @@ Cada execução tem identificador UTC com proteção contra colisões; nunca sub
 
 ## Resultado observado
 
-Experimento: `runs/results/20261125_141318_918857_a808538b_comparacao/` (execuções posteriores reproduziram seleção e métricas de teste de forma idêntica). Dos 17.002 exemplos elegíveis, 4.957 (29,2%) têm alta superior a 2%. Treino, validação e teste contêm respectivamente 10.268, 3.554 e 3.180 exemplos.
+Experimento: `runs/results/20261125_141318_918857_a808538b_comparacao/` (a reexecução de auditoria reproduziu a seleção, o F1 e a matriz de confusão do teste). Dos 17.002 exemplos elegíveis, 4.957 (29,2%) têm alta superior a 2%. Treino, validação e teste contêm respectivamente 10.268, 3.554 e 3.180 exemplos.
 
 A comparação entre famílias foi decidida na validação:
 
@@ -73,7 +73,7 @@ A comparação entre famílias foi decidida na validação:
 | Árvore de decisão | 0,25 | 0,468 | 0,493 |
 | Regressão logística | 0,25 | 0,439 | 0,503 |
 
-A random forest (`max_depth=10`, `min_samples_leaf=5`, `class_weight=None`) superou a regressão logística em 0,079 de F1 na validação. A coluna de teste foi calculada depois de fechada a seleção e não realimentou escolha alguma.
+A random forest (`max_depth=10`, `min_samples_leaf=5`, `class_weight=None`) teve F1 de 0,518 e precisão de 40,2% na validação. A mesma configuração venceria sem aplicar o piso de 35%. As diferenças entre famílias no teste são descritivas.
 
 | Métrica no teste | Resultado | IC 95% |
 |---|---:|:---:|
@@ -85,9 +85,9 @@ A random forest (`max_depth=10`, `min_samples_leaf=5`, `class_weight=None`) supe
 | Average precision | 0,538 | [0,506 – 0,571] |
 | Brier | 0,178 | [0,172 – 0,185] |
 
-A matriz contém 1.183 verdadeiros negativos, 1.078 falsos positivos, 223 falsos negativos e 696 verdadeiros positivos. A referência sempre-zero tem acurácia 0,711 e recall 0; repetir a alta anterior tem F1 0,220. O ganho de F1 sobre essa referência tem IC 95% de **+0,267 a +0,326**, e o ganho de acurácia balanceada sobre a regra sempre-zero, de **+0,123 a +0,157**: ambos excluem zero, confirmando significância estatística.
+A matriz contém 1.183 verdadeiros negativos, 1.078 falsos positivos, 223 falsos negativos e 696 verdadeiros positivos. O IC 95% do ganho de F1 sobre repetir a alta anterior vai de **+0,267 a +0,326**. O IC do ganho de acurácia balanceada sobre nunca alertar vai de **+0,123 a +0,157**. Os dois intervalos ficam acima de zero sob o bootstrap por série.
 
-O modelo apresenta informação preditiva nesse período, mas a precisão de 39% mostra que três em cada cinco alertas são falsos. O recall mensal varia entre 0,559 e 0,860, sem degradação sistemática ao longo do teste. A importância por permutação concentra o sinal em `variation_1m` e `variation_2m`; os níveis de preço em reais contribuem com importância nula ou negativa.
+No teste retrospectivo, a precisão de 39,2% indica que cerca de três em cada cinco alertas foram falsos. O recall mensal variou de 0,559 a 0,860. As variações de um e dois meses apresentaram as maiores importâncias individuais por permutação. Estimar a contribuição do histórico exigiria uma comparação com e sem seus atributos.
 
 ## Limitações
 

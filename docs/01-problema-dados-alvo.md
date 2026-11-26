@@ -8,18 +8,18 @@ O estudo avalia a capacidade preditiva sobre observações elegíveis da base, e
 
 ## 🎯 Objetivo e motivação
 
-**Objetivo.** Determinar se existe sinal preditivo aproveitável no histórico recente de preços e quantificá-lo com medida de incerteza, de forma que uma organização consiga decidir se vale construir um alerta de alta sobre esses dados e a que custo de falsos alarmes.
+**Objetivo.** Avaliar o desempenho do modelo que usa histórico de preços e características das séries para antecipar altas e quantificar a incerteza das estimativas.
 
 **Motivação.** A cesta básica consome a maior fatia do orçamento de famílias de baixa renda, que são justamente as com menor capacidade de antecipar compras. A pesquisa de preços que gera esta base já é pública, mas é lida de forma retrospectiva: ela informa o que já aconteceu.
 
 **Aplicação esperada.** Dois destinatários diretos:
 
-1. **Organizações de assistência alimentar e compras coletivas** — bancos de alimentos, cozinhas comunitárias, associações de bairro —, que compram em volume e têm alguma capacidade de estoque. Um aviso de alta provável acima de 2% é acionável: antecipa-se a compra. O erro é barato, custando capital de giro e espaço de estoque.
+1. **Organizações de assistência alimentar e compras coletivas** podem usar um alerta para avaliar a antecipação de compras, considerando estoque e capital de giro.
 2. **Programas de educação financeira e defesa do consumidor**, que podem dirigir atenção aos itens e estabelecimentos de maior risco no mês em vez de tratar a cesta de forma uniforme.
 
-Essa assimetria de custo — deixar de avisar uma alta real custa mais do que avisar uma alta que não veio — é a justificativa metodológica do limiar baixo, da métrica F1 e do piso de precisão descritos em [pipeline e seleção](04-pipeline-e-selecao.md).
+Um alerta pode ajudar a priorizar o acompanhamento de itens ou a planejar compras. A importância de cada tipo de erro depende da aplicação e dos custos de estoque, capital de giro e compra. A base permite contar falsos alertas e altas sem alerta. A avaliação do custo financeiro exigiria dados adicionais.
 
-**Critério de sucesso declarado antes do resultado.** O estudo é bem-sucedido se o modelo superar com significância estatística duas referências sem treinamento: prever sempre "sem alta" e repetir a alta do mês anterior. Caso contrário, a resposta honesta à questão é negativa.
+**Critério de avaliação.** A avaliação compara o F1 com a regra de repetir a alta anterior e a acurácia balanceada com a regra de nunca emitir alerta. Os intervalos de 95% das diferenças, estimados por bootstrap pareado por série, indicam se houve ganho nas métricas avaliadas sob esse esquema de reamostragem.
 
 ## 📋 Fonte e esquema
 

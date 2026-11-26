@@ -35,7 +35,7 @@ A função `rank_candidates` concentra o critério em um único lugar:
 
 > **Maior F1 da classe positiva entre os candidatos com precisão ≥ 0,35 na validação.** Desempate por maior precisão, depois menor limiar, depois nome do algoritmo.
 
-F1 porque a assimetria de custo descrita em [problema e alvo](01-problema-dados-alvo.md) exige equilibrar recall e precisão, e acurácia é inadequada: prever sempre "sem alta" já atinge 71,1%. O piso de precisão impede que o critério degenere — sem ele, o melhor F1 da grade viria de um candidato que emite alerta quase sempre. O desempate por nome do algoritmo existe apenas para tornar a escolha determinística quando tudo mais empata.
+O F1 foi usado para combinar precisão e recall em uma única métrica. O piso de 35% restringe a seleção a candidatos com precisão mínima na validação, quando há candidatos elegíveis. Nesta execução, o maior F1 da grade já era da random forest, com precisão de 40,2% na validação. Aplicar o piso manteve a mesma escolha. O desempate por nome do algoritmo torna a escolha determinística quando os demais critérios empatam.
 
 Se nenhum candidato atingir a precisão mínima, o sistema escolhe o melhor F1 entre todos e registra esse *fallback* na configuração. O piso de 35% é decisão metodológica declarada, não garantia de precisão em novos períodos.
 
@@ -47,7 +47,7 @@ Depois que a seleção está fechada, a melhor configuração de **cada** famíl
 
 Ela é **diagnóstico de transparência, não critério**. Nenhuma escolha de algoritmo, hiperparâmetro ou limiar foi revista depois de vê-la; o campo `post_hoc_note` em `config.json` registra isso junto aos resultados. A distinção importa: na execução documentada, a random forest venceu na validação mas o gradient boosting obteve o melhor F1 de teste. Trocar a escolha nesse ponto converteria o teste em conjunto de seleção e destruiria a única estimativa não enviesada disponível.
 
-A leitura correta é que a diferença entre as quatro famílias no teste (0,04 em F1) é **menor que a meia-largura do intervalo de confiança do próprio F1** (±0,02), ou seja, as famílias são estatisticamente próximas e a ordem entre elas não é estável.
+O gradient boosting obteve o maior F1 observado no teste (0,534), seguido pela random forest (0,517). A comparação entre famílias no teste é descritiva. Um intervalo para o F1 da random forest quantifica a incerteza da sua própria estimativa. Uma inferência sobre o ganho de uma família sobre outra exigiria um intervalo da diferença pareada, com as mesmas séries reamostradas. A random forest foi selecionada pelo desempenho na validação.
 
 ## 🎯 Probabilidade e decisão são coisas diferentes
 

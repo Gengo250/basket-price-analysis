@@ -55,14 +55,14 @@ Os intervalos usam **bootstrap por série**: cada uma das 2.000 reamostras sorte
 
 As duas referências são regras sem treinamento, avaliadas nas **mesmas linhas** do teste. "Repete alta anterior" prevê classe 1 se o preço de `t` subiu mais de 2% frente a `t−1`; não usa o preço futuro.
 
-A mesma reamostragem por série produz o intervalo da **diferença** entre modelo e referência, que é o que responde se o ganho é real ou ruído amostral:
+Em cada reamostra, o modelo e a regra de referência são avaliados nas mesmas séries sorteadas. Os percentis das diferenças formam o intervalo.
 
 | Diferença | IC 95% | Contém zero? |
 | --- | :---: | :---: |
 | Ganho de F1 sobre "repete alta anterior" | **[+0,267 – +0,326]** | Não |
 | Ganho de acurácia balanceada sobre "sempre classe 0" | **[+0,123 – +0,157]** | Não |
 
-Ambos excluem zero com folga: **o ganho sobre as duas referências é estatisticamente significativo**. A acurácia do modelo ser menor que a da regra trivial é esperado e desejado — troca-se acerto na classe majoritária por capturar 696 das 919 altas, contra zero da regra trivial.
+Os dois intervalos das diferenças ficaram acima de zero. Isso indica ganho no teste retrospectivo e nas métricas de cada comparação, sob o bootstrap por série. A reamostragem preserva a dependência dentro de cada série. Choques que afetam várias séries podem gerar dependência entre elas. O modelo capturou 696 das 919 altas, com acurácia de 59,1%. A regra de nunca alertar obteve acurácia de 71,1% e deixou passar todas as altas.
 
 O código retorna zero para precisão sem positivos previstos; para grupos sem positivos reais, recall e F1 são `null`. Acurácia balanceada e ROC-AUC são `null` quando falta uma classe.
 
@@ -77,7 +77,7 @@ O código retorna zero para precisão sem positivos previstos; para grupos sem p
 
 A seleção foi decidida na coluna de validação, onde a random forest superou a regressão logística em 0,079 de F1. A coluna de teste é diagnóstico posterior, descrito em [pipeline e seleção](04-pipeline-e-selecao.md), e não realimentou escolha alguma.
 
-Duas leituras importam. A primeira é que **o modelo linear não era a melhor escolha** para este problema — a hipótese inicial do projeto foi contrariada pela evidência. A explicação está na forma da relação entre variação passada e alta futura, medida no treino e salva em `reports/risk_by_variation.csv`: o risco cai de 0,643 (queda anterior maior que 20%) para 0,204 (preço inalterado) e volta a subir para 0,313 na faixa de 2 a 5%. O mínimo coincide com o regime de preço rígido, que concentra 36% das observações, e as inclinações de cada lado desse ponto são muito diferentes. Uma fronteira linear no logito não representa esse ponto anguloso; um corte de árvore o isola. A segunda é que **a faixa entre as quatro famílias no teste (0,04 em F1) é menor que a meia-largura do IC do próprio F1 (±0,02)**: elas são estatisticamente próximas e a ordem entre elas não é estável, tanto que o vencedor da validação não foi o vencedor do teste.
+O gradient boosting obteve o maior F1 observado no teste (0,534), seguido pela random forest (0,517). A comparação entre famílias no teste é descritiva. Um intervalo para o F1 da random forest quantifica a incerteza da sua própria estimativa. Uma inferência sobre o ganho de uma família sobre outra exigiria um intervalo da diferença pareada, com as mesmas séries reamostradas. A random forest foi selecionada pelo desempenho na validação. No treino, o risco por faixa de variação foi maior após quedas acentuadas. Essa associação é compatível com uma relação não linear e ajuda a motivar a comparação entre modelos lineares e árvores.
 
 ## 📈 Curvas e qualidade das probabilidades
 
@@ -102,13 +102,13 @@ Importância por permutação sobre os 15 atributos de entrada, medindo a queda 
 | `brand` | +0,006 |
 | `price_current`, `rolling_mean_3m`, `rolling_min_3m` | ≈ 0 ou negativo |
 
-**O sinal está nas variações relativas, não nos níveis de preço.** Esse achado tem consequência metodológica favorável: o nível médio de preço sobe de R$ 12,83 no treino para R$ 15,31 no teste, deriva inflacionária de cerca de 19%. Um modelo que dependesse do nível absoluto degradaria entre as partições; como o nível é praticamente ignorado, o modelo está protegido dessa deriva na prática.
+As variações de um e dois meses tiveram as maiores importâncias individuais por permutação nessa execução. Atributos de preço correlacionados podem compartilhar informação, o que dificulta interpretar uma importância baixa. A diferença média de preços entre treino e teste descreve a amostra, com possíveis mudanças na composição dos itens. A robustez a mudanças no nível de preços exigiria uma avaliação específica.
 
 Importância baixa não prova irrelevância: atributos redundantes dividem o crédito, e a medida continua sendo associação, não causalidade.
 
 ## 🗓️ Estabilidade e diferenças por produto
 
-Nos 12 meses de teste, o recall variou de **0,559** (março/2026, 59 positivos) a **0,860** (janeiro/2026, 100 positivos); a precisão, de 0,341 a 0,558. Não há degradação sistemática ao longo do período: a correlação entre posição do mês e F1 é r = +0,053 (p = 0,87), e nem recall (r = −0,398, p = 0,20) nem precisão (r = +0,211, p = 0,51) têm tendência significativa — apesar de o modelo ter sido ajustado com dados até agosto/2025 e o último mês avaliado ser agosto/2026.
+Nos 12 meses de teste, o recall variou de **0,559** (março/2026, 59 positivos) a **0,860** (janeiro/2026, 100 positivos). A precisão variou de 0,341 a 0,558. As correlações descritivas entre a posição do mês e o F1, recall e precisão foram, respectivamente, +0,053, −0,398 e +0,211. A estabilidade em outros períodos permanece em aberto.
 
 Entre produtos com pelo menos 30 observações, batata (recall 0,986), café (0,962) e frango peito (0,936) lideram; pão francês (0,389), óleo (0,390) e feijão (0,394) ficam na base. O custo aparece na precisão — café gera 138 falsos positivos e arroz 112, com precisão de 0,270 e 0,273.
 
@@ -118,7 +118,7 @@ Essas comparações são descritivas. Número de positivos, composição de sér
 
 ## 🧭 Resposta à pesquisa
 
-O histórico recente de preços **contém sinal preditivo real** sobre altas acima de 2%: o modelo identifica 75,7% delas (IC 95%: 72,5%–79,0%), contra 21,7% da melhor referência sem treinamento, com ganho de F1 cujo IC 95% exclui zero. A ressalva quantificada é a precisão de 0,392: três em cada cinco alertas são falsos. O estudo não estima retorno financeiro, custos de estoque nem garante generalização para fora do período e da amostra elegível.
+O modelo que usa histórico recente de preços e características das séries identificou 75,7% das altas no teste retrospectivo (IC 95%: 72,5%–79,0%). Os intervalos das diferenças foram positivos nas métricas usadas para comparar com as referências. A precisão de 39,2% indica que cerca de três em cada cinco alertas foram falsos. A contribuição específica dos atributos históricos exigiria uma comparação com e sem esses atributos.
 
 [^1]: Scikit-learn, *average_precision_score*, https://scikit-learn.org/stable/modules/generated/sklearn.metrics.average_precision_score.html.
 [^2]: Scikit-learn, *Probability calibration*, https://scikit-learn.org/stable/modules/calibration.html.

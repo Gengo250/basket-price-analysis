@@ -24,7 +24,7 @@ Comparações por produto e supermercado **não controlam multiplicidade**: com 
 
 **Otimismo de seleção:** 408 pares configuração-limiar foram avaliados no mesmo conjunto de validação. O teste temporal independente existe para medir o efeito disso. Na execução documentada a queda esperada não se materializou, mas uma reavaliação exigiria reservar novo período.
 
-**Diagnóstico posterior por família:** a coluna de métricas de teste por algoritmo foi calculada depois de fechada a seleção e não realimentou escolha alguma. Ela não deve ser usada para afirmar que outra família "seria melhor" — a diferença entre as quatro no teste é menor que a meia-largura do intervalo de confiança do próprio F1.
+**Diagnóstico posterior por família.** O gradient boosting obteve o maior F1 observado no teste (0,534), seguido pela random forest (0,517). A comparação entre famílias no teste é descritiva. Um intervalo para o F1 da random forest quantifica a incerteza da sua própria estimativa. Uma inferência sobre o ganho de uma família sobre outra exigiria um intervalo da diferença pareada, com as mesmas séries reamostradas. A random forest foi selecionada pelo desempenho na validação.
 
 Inflação, custos de produção, promoções, sazonalidade econômica, impostos e disponibilidade podem afetar preços sem estar medidos. Uma mudança nessas relações degrada classificação e calibração.
 
@@ -40,7 +40,7 @@ Importância por permutação também é associação, não causa. Um atributo r
 
 O nível médio de preço sobe de R$ 12,83 no treino para R$ 15,31 no teste, deriva de cerca de 19% entre as partições. Um modelo que dependesse do nível absoluto tenderia a degradar.
 
-A importância por permutação mostra que **o modelo praticamente ignora os níveis** e concentra o sinal em `variation_1m` e `variation_2m`, o que o protege dessa deriva na prática. Essa é uma constatação empírica sobre a execução documentada, não uma garantia estrutural: atributos de nível continuam presentes na lista e poderiam ser usados por outra configuração. Uma versão futura poderia normalizar os preços pela própria série e eliminar o risco por construção.
+As variações de um e dois meses tiveram as maiores importâncias individuais por permutação nessa execução. Atributos de preço correlacionados podem compartilhar informação, o que dificulta interpretar uma importância baixa. A diferença média de preços entre treino e teste descreve a amostra, com possíveis mudanças na composição dos itens. A robustez a mudanças no nível de preços exigiria uma avaliação específica.
 
 ## 🚫 O que o modelo não entrega
 
@@ -55,6 +55,6 @@ Uma probabilidade de 0,40 é estimativa condicional do modelo, sujeita à calibr
 
 ## 🔎 Investigações futuras possíveis
 
-Antes de uma aplicação prática: definir com a organização destinatária o custo de cada tipo de erro e reposicionar o limiar sobre a curva de trade-off; substituir a janela única por avaliação temporal deslizante com novo período final reservado; incorporar preços ao produtor como atributo defasado para testar atraso de repasse; normalizar preços pela própria série para eliminar por construção a dependência de nível; obter documentação da pesquisa de coleta para validar unidades, identidade de produto e disponibilidade.
+Antes de uma aplicação prática, é necessário definir o custo de cada tipo de erro e avaliar eventuais ajustes de limiar na validação cronológica. Outras possibilidades incluem validar unidades, identidade do produto e disponibilidade dos dados, e verificar a estabilidade em outras janelas temporais.
 
 Essas propostas são possibilidades de pesquisa, não resultados do projeto atual.
